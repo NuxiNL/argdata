@@ -21,7 +21,8 @@
 // OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-#pragma once
+#ifndef ARGDATA_HPP
+#define ARGDATA_HPP
 
 #include <time.h>
 
@@ -315,3 +316,5 @@ public:
 	}
 
 };
+
+#endif
