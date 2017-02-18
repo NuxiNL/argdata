@@ -104,8 +104,8 @@ bool argdata_seq_next(argdata_seq_iterator_t *, const argdata_t **);
     return 0;                                                    \
   }
 #define ARGDATA_INT_U(type, stype, max)                           \
-  static inline int _argdata_get_int_##stype(const argdata_t *ad, \
-                                             type *value) {       \
+  static inline int argdata_get_int_##stype(const argdata_t *ad,  \
+                                            type *value) {        \
     uintmax_t v;                                                  \
     int error;                                                    \
                                                                   \
