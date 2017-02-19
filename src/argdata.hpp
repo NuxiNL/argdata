@@ -194,6 +194,9 @@ public:
 			++*this;
 			return copy;
 		}
+		int error() const {
+			return it_.error;
+		}
 		friend bool operator==(map_iterator const &a, map_iterator const &b) {
 			return a.value_ == b.value_;
 		}
@@ -237,6 +240,9 @@ public:
 			++*this;
 			return copy;
 		}
+		int error() const {
+			return it_.error;
+		}
 		friend bool operator==(seq_iterator const &a, seq_iterator const &b) {
 			return a.value_ == b.value_;
 		}
@@ -250,6 +256,11 @@ public:
 		argdata_map_iterator_t start_it_;
 		friend argdata_t;
 	public:
+		map_iterator before_begin() const {
+			map_iterator i;
+			i.it_ = start_it_;
+			return i;
+		}
 		map_iterator begin() const {
 			map_iterator i;
 			i.it_ = start_it_;
@@ -264,6 +275,11 @@ public:
 		argdata_seq_iterator_t start_it_;
 		friend argdata_t;
 	public:
+		seq_iterator before_begin() const {
+			seq_iterator i;
+			i.it_ = start_it_;
+			return i;
+		}
 		seq_iterator begin() const {
 			seq_iterator i;
 			i.it_ = start_it_;
