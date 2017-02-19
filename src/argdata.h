@@ -92,43 +92,20 @@ bool argdata_seq_next(argdata_seq_iterator_t *, const argdata_t **);
 
 // Generic fetching of integer values.
 
-#define ARGDATA_INT_S(type, stype, min, max)                     \
-  static inline int argdata_get_int_##stype(const argdata_t *ad, \
-                                            type *value) {       \
-    intmax_t v;                                                  \
-    int error;                                                   \
-                                                                 \
-    error = argdata_get_int_s(ad, &v, min, max);                 \
-    if (error != 0)                                              \
-      return error;                                              \
-    *value = (type)v;                                            \
-    return 0;                                                    \
-  }
-#define ARGDATA_INT_U(type, stype, max)                          \
-  static inline int argdata_get_int_##stype(const argdata_t *ad, \
-                                            type *value) {       \
-    uintmax_t v;                                                 \
-    int error;                                                   \
-                                                                 \
-    error = argdata_get_int_u(ad, &v, max);                      \
-    if (error != 0)                                              \
-      return error;                                              \
-    *value = (type)v;                                            \
-    return 0;                                                    \
-  }
-ARGDATA_INT_S(char, char, CHAR_MIN, CHAR_MAX)
-ARGDATA_INT_S(signed char, schar, SCHAR_MIN, SCHAR_MAX)
-ARGDATA_INT_U(unsigned char, uchar, UCHAR_MAX)
-ARGDATA_INT_S(short, short, SHRT_MIN, SHRT_MAX)
-ARGDATA_INT_U(unsigned short, ushort, USHRT_MAX)
-ARGDATA_INT_S(int, int, INT_MIN, INT_MAX)
-ARGDATA_INT_U(unsigned int, uint, UINT_MAX)
-ARGDATA_INT_S(long, long, LONG_MIN, LONG_MAX)
-ARGDATA_INT_U(unsigned long, ulong, ULONG_MAX)
-ARGDATA_INT_S(long long, llong, LLONG_MIN, LLONG_MAX)
-ARGDATA_INT_U(unsigned long long, ullong, ULLONG_MAX)
-#undef ARGDATA_INT_S
-#undef ARGDATA_INT_U
+#ifdef __cplusplus
+// In C++, use overloading.
+
+inline argdata_t *argdata_create_int(intmax_t v) {
+  return argdata_create_int_s(v);
+}
+inline argdata_t *argdata_create_int(uintmax_t v) {
+  return argdata_create_int_u(v);
+}
+
+#define ARGDATA_INT_OVERLOAD_NAME(stype) argdata_get_int
+
+#else
+// In C, use macros with _Generic.
 
 // clang-format off
 #define argdata_create_int(value)                \
@@ -157,6 +134,51 @@ ARGDATA_INT_U(unsigned long long, ullong, ULLONG_MAX)
            unsigned long: argdata_get_int_ulong,   \
            long long: argdata_get_int_llong,       \
            unsigned long long: argdata_get_int_ullong)(ad, value)
+
+#define ARGDATA_INT_OVERLOAD_NAME(stype) argdata_get_int_##stype
+
 // clang-format on
+#endif
+
+#define ARGDATA_INT_S(type, stype, min, max)                              \
+  static inline int ARGDATA_INT_OVERLOAD_NAME(stype)(const argdata_t *ad, \
+                                                     type *value) {       \
+    intmax_t v;                                                           \
+    int error;                                                            \
+                                                                          \
+    error = argdata_get_int_s(ad, &v, min, max);                          \
+    if (error != 0)                                                       \
+      return error;                                                       \
+    *value = (type)v;                                                     \
+    return 0;                                                             \
+  }
+#define ARGDATA_INT_U(type, stype, max)                                   \
+  static inline int ARGDATA_INT_OVERLOAD_NAME(stype)(const argdata_t *ad, \
+                                                     type *value) {       \
+    uintmax_t v;                                                          \
+    int error;                                                            \
+                                                                          \
+    error = argdata_get_int_u(ad, &v, max);                               \
+    if (error != 0)                                                       \
+      return error;                                                       \
+    *value = (type)v;                                                     \
+    return 0;                                                             \
+  }
+
+ARGDATA_INT_S(char, char, CHAR_MIN, CHAR_MAX)
+ARGDATA_INT_S(signed char, schar, SCHAR_MIN, SCHAR_MAX)
+ARGDATA_INT_U(unsigned char, uchar, UCHAR_MAX)
+ARGDATA_INT_S(short, short, SHRT_MIN, SHRT_MAX)
+ARGDATA_INT_U(unsigned short, ushort, USHRT_MAX)
+ARGDATA_INT_S(int, int, INT_MIN, INT_MAX)
+ARGDATA_INT_U(unsigned int, uint, UINT_MAX)
+ARGDATA_INT_S(long, long, LONG_MIN, LONG_MAX)
+ARGDATA_INT_U(unsigned long, ulong, ULONG_MAX)
+ARGDATA_INT_S(long long, llong, LLONG_MIN, LLONG_MAX)
+ARGDATA_INT_U(unsigned long long, ullong, ULLONG_MAX)
+
+#undef ARGDATA_INT_OVERLOAD_NAME
+#undef ARGDATA_INT_S
+#undef ARGDATA_INT_U
 
 #endif
