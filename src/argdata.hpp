@@ -74,7 +74,9 @@ public:
 	static std::unique_ptr<argdata_t> create_str(mstd::string_view v) {
 		return std::unique_ptr<argdata_t>(argdata_create_str(v.data(), v.size()));
 	}
-	//TODO: static argdata_t create_timestamp(timespec const *);
+	static std::unique_ptr<argdata_t> create_timestamp(timespec const & v) {
+		return std::unique_ptr<argdata_t>(argdata_create_timestamp(&v));
+	}
 
 	static std::unique_ptr<argdata_t> create_map(
 		mstd::range<argdata_t const *const> keys,
@@ -134,17 +136,21 @@ public:
 		if (argdata_get_str(this, &data, &size)) return {};
 		return mstd::string_view(data, size);
 	}
-	//TODO: mstd::optional<timespec> get_timestamp() const;
+	mstd::optional<timespec> get_timestamp() const {
+		timespec r;
+		if (argdata_get_timestamp(this, &r)) return {};
+		return r;
+	}
 
 	// Same as above, but return a default value (empty/zero/etc.) instead of nullopt.
-	mstd::range<unsigned char const> as_binary() const { return get_binary().value_or(            nullptr); }
-	bool                             as_bool  () const { return get_bool  ().value_or(              false); }
-	int                              as_fd    () const { return get_fd    ().value_or(                 -1); }
-	double                           as_float () const { return get_float ().value_or(                0.0); }
-	std::intmax_t                    as_int   () const { return get_int   ().value_or(                  0); }
-	std::uintmax_t                   as_uint  () const { return get_uint  ().value_or(                  0); }
-	mstd::string_view                as_str   () const { return get_str   ().value_or(mstd::string_view{}); }
-	//TODO: timespec as_timestamp() const { return get_timestamp().value_or({}); }
+	mstd::range<unsigned char const> as_binary   () const { return get_binary   ().value_or(            nullptr); }
+	bool                             as_bool     () const { return get_bool     ().value_or(              false); }
+	int                              as_fd       () const { return get_fd       ().value_or(                 -1); }
+	double                           as_float    () const { return get_float    ().value_or(                0.0); }
+	std::intmax_t                    as_int      () const { return get_int      ().value_or(                  0); }
+	std::uintmax_t                   as_uint     () const { return get_uint     ().value_or(                  0); }
+	mstd::string_view                as_str      () const { return get_str      ().value_or(mstd::string_view{}); }
+	timespec                         as_timestamp() const { return get_timestamp().value_or(         timespec{}); }
 
 	class map;
 	class seq;
