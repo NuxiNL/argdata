@@ -42,6 +42,8 @@ add_library(argdata
 
 target_link_libraries(argdata m)
 
+target_include_directories(argdata PUBLIC src)
+
 set_property(
 	TARGET
 		argdata
