@@ -86,7 +86,7 @@ int argdata_get_timestamp(const argdata_t *ad, struct timespec *value) {
 
       // Store result in struct timespec.
       int64_t sec;
-      if (low > (uint64_t)INT64_MAX || (high << 32) > INT64_MAX - (int64_t)low )
+      if (low > (uint64_t)INT64_MAX || (high << 32) > INT64_MAX - (int64_t)low)
         return ERANGE;
       sec = low + (high << 32);
       if (sec < NUMERIC_MIN(time_t) || sec > NUMERIC_MAX(time_t))
