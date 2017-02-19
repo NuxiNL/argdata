@@ -200,8 +200,25 @@ static inline void encode_fd(int value, uint8_t **buf) {
 
 // Validates whether a string uses valid UTF-8.
 static inline int validate_string(const char *buf, size_t len) {
-  // This implementation acts as a placeholder outside of CloudABI.
-  // TODO: Implement when inside CloudABI.
+#ifdef LC_C_UNICODE_LOCALE
+  // TODO(ed): Any way we can prevent pulling in the entire locale?
+  locale_t locale = LC_C_UNICODE_LOCALE;
+  static const mbstate_t initial_mbstate;
+  mbstate_t mbs = initial_mbstate;
+  while (len > 0) {
+    ssize_t clen = mbrtowc_l(NULL, buf, len, &mbs, locale);
+    if (clen <= 0) {
+      if (clen < 0)
+        return EILSEQ;
+      // Skip null bytes.
+      clen = 1;
+    }
+    buf += clen;
+    len -= clen;
+  }
+#else
+// TODO(ed): Make string validation work properly.
+#endif
   return 0;
 }
 
