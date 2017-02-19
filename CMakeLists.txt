@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.5)
 
 project(argdata)
 
+option(BUILD_SHARED_LIBS "Build as shared library" ON)
+
 include(GNUInstallDirs)
 
-add_library(argdata SHARED
+add_library(argdata
 	src/argdata_create_binary.c
 	src/argdata_create_buffer.c
 	src/argdata_create_fd.c
