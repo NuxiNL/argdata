@@ -27,6 +27,7 @@
 #define ARGDATA_H
 
 #include <limits.h>
+#include <stdalign.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -37,12 +38,12 @@ typedef struct argdata_t argdata_t;
 #endif
 
 typedef struct {
-  _Alignas(long) int error;
+  alignas(long) int error;
   char data[128];
 } argdata_map_iterator_t;
 
 typedef struct {
-  _Alignas(long) int error;
+  alignas(long) int error;
   char data[128];
 } argdata_seq_iterator_t;
 
