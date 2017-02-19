@@ -74,15 +74,14 @@ size_t argdata_get_buffer(const argdata_t *, void *, int *);
 int argdata_get_bool(const argdata_t *, bool *);
 int argdata_get_fd(const argdata_t *, int *);
 int argdata_get_float(const argdata_t *, double *);
-int argdata_get_int_s(const argdata_t *, intmax_t *, intmax_t,
-                      intmax_t);
+int argdata_get_int_s(const argdata_t *, intmax_t *, intmax_t, intmax_t);
 int argdata_get_int_u(const argdata_t *, uintmax_t *, uintmax_t);
 int argdata_get_str(const argdata_t *, const char **, size_t *);
 int argdata_get_str_c(const argdata_t *, const char **);
 int argdata_get_timestamp(const argdata_t *, struct timespec *);
 int argdata_map_iterate(const argdata_t *, argdata_map_iterator_t *);
 bool argdata_map_next(argdata_map_iterator_t *, const argdata_t **,
-                       const argdata_t **);
+                      const argdata_t **);
 void argdata_print_yaml(const argdata_t *, FILE *);
 int argdata_seq_iterate(const argdata_t *, argdata_seq_iterator_t *);
 bool argdata_seq_next(argdata_seq_iterator_t *, const argdata_t **);
@@ -104,17 +103,17 @@ bool argdata_seq_next(argdata_seq_iterator_t *, const argdata_t **);
     *value = (type)v;                                            \
     return 0;                                                    \
   }
-#define ARGDATA_INT_U(type, stype, max)                           \
-  static inline int argdata_get_int_##stype(const argdata_t *ad,  \
-                                            type *value) {        \
-    uintmax_t v;                                                  \
-    int error;                                                    \
-                                                                  \
-    error = argdata_get_int_u(ad, &v, max);                       \
-    if (error != 0)                                               \
-      return error;                                               \
-    *value = (type)v;                                             \
-    return 0;                                                     \
+#define ARGDATA_INT_U(type, stype, max)                          \
+  static inline int argdata_get_int_##stype(const argdata_t *ad, \
+                                            type *value) {       \
+    uintmax_t v;                                                 \
+    int error;                                                   \
+                                                                 \
+    error = argdata_get_int_u(ad, &v, max);                      \
+    if (error != 0)                                              \
+      return error;                                              \
+    *value = (type)v;                                            \
+    return 0;                                                    \
   }
 ARGDATA_INT_S(char, char, CHAR_MIN, CHAR_MAX)
 ARGDATA_INT_S(signed char, schar, SCHAR_MIN, SCHAR_MAX)
