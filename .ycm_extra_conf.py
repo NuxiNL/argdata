@@ -7,6 +7,7 @@ def FlagsForFile(filename, **kwargs):
 		'flags': [
 			'-x', 'c++',
 			'-std=c++14',
+			'-I', dir + '/src',
 			'-I', dir + '/mstd/include',
 		],
 		'do_cache': True
