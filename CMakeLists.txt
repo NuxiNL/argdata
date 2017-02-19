@@ -32,6 +32,7 @@ add_library(argdata
 	src/argdata_map_iterate.c
 	src/argdata_map_next.c
 	src/argdata_null.c
+	src/argdata_print_yaml.c
 	src/argdata_seq_iterate.c
 	src/argdata_seq_next.c
 	src/argdata_true.c

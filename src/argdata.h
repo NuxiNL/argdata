@@ -28,8 +28,8 @@
 
 #include <limits.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #ifndef argdata_t
 typedef struct argdata_t argdata_t;
@@ -83,6 +83,7 @@ int argdata_get_timestamp(const argdata_t *, struct timespec *);
 int argdata_map_iterate(const argdata_t *, argdata_map_iterator_t *);
 bool argdata_map_next(argdata_map_iterator_t *, const argdata_t **,
                        const argdata_t **);
+void argdata_print_yaml(const argdata_t *, FILE *);
 int argdata_seq_iterate(const argdata_t *, argdata_seq_iterator_t *);
 bool argdata_seq_next(argdata_seq_iterator_t *, const argdata_t **);
 #ifdef __cplusplus
