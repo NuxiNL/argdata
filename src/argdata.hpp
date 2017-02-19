@@ -28,6 +28,7 @@
 
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -50,10 +51,10 @@ public:
 		argdata_free(static_cast<argdata_t *>(p));
 	}
 
-	static std::unique_ptr<argdata_t> create_encoded(mstd::range<unsigned char> r) {
+	static std::unique_ptr<argdata_t> create_encoded(mstd::range<unsigned char const> r) {
 		return std::unique_ptr<argdata_t>(argdata_create_buffer(r.data(), r.size()));
 	}
-	static std::unique_ptr<argdata_t> create_binary(mstd::range<unsigned char> r) {
+	static std::unique_ptr<argdata_t> create_binary(mstd::range<unsigned char const> r) {
 		return std::unique_ptr<argdata_t>(argdata_create_binary(r.data(), r.size()));
 	}
 	static std::unique_ptr<argdata_t> create_fd(int v) {
@@ -63,13 +64,13 @@ public:
 		return std::unique_ptr<argdata_t>(argdata_create_float(v));
 	}
 	static std::unique_ptr<argdata_t> create_int(std::uintmax_t v) {
-		return std::unique_ptr<argdata_t>(argdata_create_int(v));
+		return std::unique_ptr<argdata_t>(argdata_create_int_s(v));
 	}
 	static std::unique_ptr<argdata_t> create_int(std::intmax_t v) {
-		return std::unique_ptr<argdata_t>(argdata_create_int(v));
+		return std::unique_ptr<argdata_t>(argdata_create_int_u(v));
 	}
 	static std::unique_ptr<argdata_t> create_int(int v) {
-		return std::unique_ptr<argdata_t>(argdata_create_int(v));
+		return std::unique_ptr<argdata_t>(argdata_create_int_s(v));
 	}
 	static std::unique_ptr<argdata_t> create_str(mstd::string_view v) {
 		return std::unique_ptr<argdata_t>(argdata_create_str(v.data(), v.size()));
@@ -122,12 +123,15 @@ public:
 	}
 	mstd::optional<std::intmax_t> get_int() const {
 		std::intmax_t r;
-		if (argdata_get_int(this, &r)) return {};
+		std::intmax_t const min = std::numeric_limits<std::intmax_t>::min();
+		std::intmax_t const max = std::numeric_limits<std::intmax_t>::max();
+		if (argdata_get_int_s(this, &r, min, max)) return {};
 		return r;
 	}
 	mstd::optional<std::uintmax_t> get_uint() const {
 		std::uintmax_t r;
-		if (argdata_get_int(this, &r)) return {};
+		std::uintmax_t const max = std::numeric_limits<std::uintmax_t>::max();
+		if (argdata_get_int_u(this, &r, max)) return {};
 		return r;
 	}
 	mstd::optional<mstd::string_view> get_str() const {
