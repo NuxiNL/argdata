@@ -4,7 +4,7 @@ project(argdata)
 
 include(GNUInstallDirs)
 
-add_library(argdata
+add_library(argdata SHARED
 	src/argdata_create_binary.c
 	src/argdata_create_buffer.c
 	src/argdata_create_fd.c
@@ -37,6 +37,8 @@ add_library(argdata
 	src/argdata_seq_next.c
 	src/argdata_true.c
 )
+
+target_link_libraries(argdata m)
 
 set_property(
 	TARGET
