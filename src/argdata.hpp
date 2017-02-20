@@ -45,8 +45,6 @@ public:
 	argdata_t(argdata_t const &) = delete;
 	argdata_t &operator=(argdata_t const &) = delete;
 
-#undef argdata_struct_name
-
 	void operator delete (void *p) {
 		argdata_free(static_cast<argdata_t *>(p));
 	}
