@@ -21,8 +21,6 @@
 // OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-// <argdata.h> - argument data for programs
-
 #ifndef ARGDATA_H
 #define ARGDATA_H
 
@@ -32,68 +30,206 @@
 #include <stdint.h>
 #include <stdio.h>
 
+struct timespec;
+
+// The (opaque) type representing an argdata value.
+// This library interface only ever exposes pointers to argdata_t, never
+// argdata_t objects themselves.
 #ifndef argdata_t
 typedef struct argdata_t argdata_t;
 #define argdata_t argdata_t
 #endif
 
+// The (mostly opaque) type representing an iterator into an argdata_t map.
+// See argdata_map_iterate and argdata_map_next.
 typedef struct {
   alignas(long) int error;
   char data[128];
 } argdata_map_iterator_t;
 
+// The (mostly opaque) type representing an iterator into an argdata_t sequence.
+// See argdata_seq_iterate and argdata_seq_next.
 typedef struct {
   alignas(long) int error;
   char data[128];
 } argdata_seq_iterator_t;
 
-struct timespec;
-
+// The global constant representing a false boolean value.
 extern const argdata_t argdata_false;
-extern const argdata_t argdata_null;
+
+// The global constant representing a true boolean value.
 extern const argdata_t argdata_true;
+
+// The global constant representing no value.
+extern const argdata_t argdata_null;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-argdata_t *argdata_create_binary(const void *, size_t);
+
+// Create a value from a buffer containing the serialized argdata.
+// The data is not decoded, the get and iterate functions operate directly on
+// the serialized data.
+// The data is not copied, only the pointer and size are stored in the
+// argdata_t object.
 argdata_t *argdata_create_buffer(const void *, size_t);
+
+// Create an argdata_t representing a binary value.
+// The data is not copied, only the pointer and size are stored in the
+// argdata_t object.
+argdata_t *argdata_create_binary(const void *, size_t);
+
+// Create an argdata_t representing a file descriptor.
 argdata_t *argdata_create_fd(int);
+
+// Create an argdata_t representing a floating point value.
 argdata_t *argdata_create_float(double);
+
+// Create an argdata_t representing an integer.
+// Use argdata_create_int(any_integral_type) to call the right function, based
+// on whether the type is unsigned or not.
 argdata_t *argdata_create_int_s(intmax_t);
 argdata_t *argdata_create_int_u(uintmax_t);
-argdata_t *argdata_create_map(argdata_t const *const *,
-                              argdata_t const *const *, size_t);
+
+// Create an argdata_t representing a map (of key-value pairs of argdata_t).
+// The given arrays are not copied. Only the pointers and the size is stored in
+// the argdata_t object.
+argdata_t *argdata_create_map(argdata_t const *const *keys,
+                              argdata_t const *const *values,
+                              size_t n_key_value_pairs);
+
+// Create an argdata_t representing a sequence (of argdata_t).
+// The given array is not copied. Only the pointer and the size is stored in
+// the argdata_t object.
 argdata_t *argdata_create_seq(argdata_t const *const *, size_t);
+
+// Create an argdata_t representing a string.
+// The string must be valid UTF-8.
+// The _c variant takes a null-terminated string, and calculates the size using
+// strlen().
 argdata_t *argdata_create_str(const char *, size_t);
 argdata_t *argdata_create_str_c(const char *);
+
+// Create an argdata_t representing a timestamp.
+// A (serialized) copy of the timespec is made, so the original does not have
+// to be kept around.
 argdata_t *argdata_create_timestamp(const struct timespec *);
+
+// Free an argdata_t.
+// Any argdata_t created with an argdata_create_ function should be freed with
+// this function.
 void argdata_free(argdata_t *);
+
+// Calculate the length of the serialization of the given argdata_t value.
+// The size is stored in *size.
+// If n_fds is not NULL, the number of file descriptor values (nested) in the
+// argdata_t will be stored in *n_fds. This is not necessarily the same as the
+// amount of unique file descriptors, as multiple values can refer to the same
+// file descriptor.
+void argdata_get_buffer_length(const argdata_t *, size_t *size, size_t *n_fds);
+
+// Serialize the given argdata_t value into buf.
+// The number of bytes needed and used in buf can be determined with
+// argdata_serialized_length.
+// If fds is not NULL, file descriptor values in this argdata_t will be remapped
+// to the lowest possible values. The mapping is then stored in the array
+// pointed
+// at by fds: fds[0] will contain the file descriptor that was serialized as
+// fd 0, etc. The number of unique file descriptors, which is the number of
+// file descriptors stored in fds, is returned.
+// Use *n_fds of argdata_serialize_length to get an upper bound on the number
+// of unique file descriptors, to determine the size of the array.
+// If fds is NULL, 0 is returned.
+size_t argdata_get_buffer(const argdata_t *, void *buf, int *fds);
+
+// Get the pointer and size to the binary data in the argdata_t.
+// On success, returns 0.
+// Returns EINVAL if the argdata_t value isn't of the binary type.
 int argdata_get_binary(const argdata_t *, const void **, size_t *);
-void argdata_get_buffer_length(const argdata_t *, size_t *, size_t *);
-size_t argdata_get_buffer(const argdata_t *, void *, int *);
+
+// Get the boolean value of the argdata_t.
+// Returns 0 on success, or EINVAL if the argdata_t is not a boolean.
 int argdata_get_bool(const argdata_t *, bool *);
+
+// Get the file descriptor represented by the argdata_t.
+// Returns 0 on success, or EINVAL if the argdata_t does not represent a file
+// descriptor.
 int argdata_get_fd(const argdata_t *, int *);
+
+// Get the floating point value of the argdata_t.
+// Returns 0 on success, or EINVAL if the argdata_t is not a float.
 int argdata_get_float(const argdata_t *, double *);
+
+// Get the integer value of the argdata_t.
+// Returns 0 on success, EINVAL when the argdata_t isn't an integer,
+// or ERANGE when the integer did not fit in the given range.
+// Use argdata_get_int(const argdata_t *, any_integral_type *) to call the
+// right function with the range of the used type.
 int argdata_get_int_s(const argdata_t *, intmax_t *, intmax_t, intmax_t);
 int argdata_get_int_u(const argdata_t *, uintmax_t *, uintmax_t);
+
+// Get the string value of the argdata_t.
+// Returns 0 on succes, or EINVAL when the argdata_T isn't a string.
+// The _c variant returns EILSEQ if the string contains embedded null bytes.
+// The _c variant shouldn't be used on argdata_t created by argdata_create_str.
+#ifdef LC_C_UNICODE_LOCALE
+// Returns EILSEQ if the string is not valid UTF-8.
+#endif
 int argdata_get_str(const argdata_t *, const char **, size_t *);
 int argdata_get_str_c(const argdata_t *, const char **);
+
+// Get the timestamp value of the argdata_t.
+// Returns 0 on succes, ERANGE if the timestamp doesn't fit in a timespec, or
+// EINVAL if the argdata_t isn't a timestamp.
 int argdata_get_timestamp(const argdata_t *, struct timespec *);
-int argdata_map_iterate(const argdata_t *, argdata_map_iterator_t *);
-bool argdata_map_next(argdata_map_iterator_t *, const argdata_t **,
-                      const argdata_t **);
+
+// Initialize a argdata_map_iterator to iterate over the given map.
+// Returns 0 on success, or EINVAL when the argdata_t isn't a map.
+// On error, the iterator is still initialized, but to iterate over an empty
+// sequence instead. The return value is also stored in it->error.
+int argdata_map_iterate(const argdata_t *, argdata_map_iterator_t *it);
+
+// Read the next element of a map.
+// Use argdata_map_iterate to (re)initialize an iterator to (re)start iterating
+// over a map.
+// For every key-value pair, the key and value are stored in *key and *value,
+// and true is returned. The returned *key and *value may be invalidated when
+// the iterator is advanced or reset.
+// When no more key-value pairs are left, false is returned.
+// When corrupted data (data not encoding a subfield, or a key without a value)
+// is encountered, false is returned and it->error is set to EINVAL.
+bool argdata_map_next(argdata_map_iterator_t *it, const argdata_t **key,
+                      const argdata_t **value);
+
+// Initialize a argdata_seq_iterator to iterate over the given seq.
+// Returns 0 on success, or EINVAL when the argdata_t isn't a seq.
+// On error, the iterator is still initialized, but to iterate over an empty
+// sequence instead. The return value is also stored in it->error.
+int argdata_seq_iterate(const argdata_t *, argdata_seq_iterator_t *it);
+
+// Read the next element of a seq.
+// Use argdata_seq_iterate to (re)initialize an iterator to (re)start iterating
+// over a seq.
+// For every element, the element is stored in *element, and true is returned.
+// The returned *element may be invalidated when the iterator is advanced or
+// reset.
+// When no more elements are left, false is returned.
+// When corrupted data (data not encoding a subfield) is encountered, false is
+// returned and it->error is set to EINVAL.
+bool argdata_seq_next(argdata_seq_iterator_t *it, const argdata_t **element);
+
+// Write a yaml representation of the argdata to the given file.
 void argdata_print_yaml(const argdata_t *, FILE *);
-int argdata_seq_iterate(const argdata_t *, argdata_seq_iterator_t *);
-bool argdata_seq_next(argdata_seq_iterator_t *, const argdata_t **);
+
 #ifdef __cplusplus
 }
 #endif
 
-// Generic fetching of integer values.
+// Definitions of argdata_create_int and argdata_get_int below.
+// In C, macros and _Generic() are used.
+// In C++, overloading is used.
 
 #ifdef __cplusplus
-// In C++, use overloading.
 
 inline argdata_t *argdata_create_int(intmax_t v) {
   return argdata_create_int_s(v);
@@ -105,7 +241,6 @@ inline argdata_t *argdata_create_int(uintmax_t v) {
 #define ARGDATA_INT_OVERLOAD_NAME(stype) argdata_get_int
 
 #else
-// In C, use macros with _Generic.
 
 // clang-format off
 #define argdata_create_int(value)                \

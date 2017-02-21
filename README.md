@@ -45,6 +45,12 @@ Argdata values have one of the following types:
  - timestamp - A point in time. (In UTC, no timezone information.)
  - fd - A file descriptor number, used on POSIX and CloudABI systems.
 
+## Library
+
+This repository contains a C library for handling argdata. See the
+(well-commented) [argdata.h](src/argdata.h) for the details. A C++ interface is
+available for the same library in [argdata.hpp](src/argdata.hpp).
+
 ## Binary encoding
 
 The first byte of an encoded argdata value encodes the type of the value, using
