@@ -107,6 +107,9 @@ argdata_t *argdata_create_seq(argdata_t const *const *, size_t);
 // The string must be valid UTF-8.
 // The _c variant takes a null-terminated string, and calculates the size using
 // strlen().
+#ifdef LC_C_UNICODE_LOCALE
+// Returns NULL and sets errno to EILSEQ if the string is not valid UTF-8.
+#endif
 argdata_t *argdata_create_str(const char *, size_t);
 argdata_t *argdata_create_str_c(const char *);
 
