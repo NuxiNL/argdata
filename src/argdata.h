@@ -169,7 +169,7 @@ int argdata_get_int_s(const argdata_t *, intmax_t *, intmax_t, intmax_t);
 int argdata_get_int_u(const argdata_t *, uintmax_t *, uintmax_t);
 
 // Get the string value of the argdata_t.
-// Returns 0 on succes, or EINVAL when the argdata_T isn't a string.
+// Returns 0 on succes, or EINVAL when the argdata_t isn't a string.
 // The _c variant returns EILSEQ if the string contains embedded null bytes.
 // The _c variant shouldn't be used on argdata_t created by argdata_create_str.
 #ifdef LC_C_UNICODE_LOCALE
