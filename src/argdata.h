@@ -72,7 +72,7 @@ extern "C" {
 // the serialized data.
 // The data is not copied, only the pointer and size are stored in the
 // argdata_t object.
-argdata_t *argdata_create_buffer(const void *, size_t);
+argdata_t *argdata_from_buffer(const void *, size_t);
 
 // Create an argdata_t representing a binary value.
 // The data is not copied, only the pointer and size are stored in the

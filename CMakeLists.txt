@@ -8,7 +8,6 @@ include(GNUInstallDirs)
 
 add_library(argdata
 	src/argdata_create_binary.c
-	src/argdata_create_buffer.c
 	src/argdata_create_fd.c
 	src/argdata_create_float.c
 	src/argdata_create_int_s.c
@@ -20,10 +19,9 @@ add_library(argdata
 	src/argdata_create_timestamp.c
 	src/argdata_false.c
 	src/argdata_free.c
+	src/argdata_from_buffer.c
 	src/argdata_get_binary.c
 	src/argdata_get_bool.c
-	src/argdata_get_buffer.c
-	src/argdata_get_buffer_length.c
 	src/argdata_get_fd.c
 	src/argdata_get_float.c
 	src/argdata_get_int_s.c
@@ -37,6 +35,8 @@ add_library(argdata
 	src/argdata_print_yaml.c
 	src/argdata_seq_iterate.c
 	src/argdata_seq_next.c
+	src/argdata_serialize.c
+	src/argdata_serialized_length.c
 	src/argdata_true.c
 )
 
