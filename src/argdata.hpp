@@ -49,8 +49,8 @@ public:
 		argdata_free(static_cast<argdata_t *>(p));
 	}
 
-	static std::unique_ptr<argdata_t> create_encoded(mstd::range<unsigned char const> r) {
-		return std::unique_ptr<argdata_t>(argdata_create_buffer(r.data(), r.size()));
+	static std::unique_ptr<argdata_t> create_from_buffer(mstd::range<unsigned char const> r) {
+		return std::unique_ptr<argdata_t>(argdata_from_buffer(r.data(), r.size()));
 	}
 	static std::unique_ptr<argdata_t> create_binary(mstd::range<unsigned char const> r) {
 		return std::unique_ptr<argdata_t>(argdata_create_binary(r.data(), r.size()));
@@ -313,22 +313,22 @@ public:
 		return r;
 	}
 
-	size_t encoded_size(size_t *n_fds = nullptr) const {
+	size_t serialized_length(size_t *n_fds = nullptr) const {
 		size_t r;
-		argdata_get_buffer_length(this, &r, n_fds);
+		argdata_serialized_length(this, &r, n_fds);
 		return r;
 	}
 
 	void encode(std::vector<unsigned char> &buffer) const {
-		buffer.resize(encoded_size());
-		argdata_get_buffer(this, buffer.data(), nullptr);
+		buffer.resize(serialized_length());
+		argdata_serialize(this, buffer.data(), nullptr);
 	}
 
 	void encode(std::vector<unsigned char> &buffer, std::vector<int> &fds) const {
 		size_t n_fds;
-		buffer.resize(encoded_size(&n_fds));
+		buffer.resize(serialized_length(&n_fds));
 		fds.resize(n_fds);
-		n_fds = argdata_get_buffer(this, buffer.data(), fds.data());
+		n_fds = argdata_serialize(this, buffer.data(), fds.data());
 		fds.resize(n_fds);
 	}
 
