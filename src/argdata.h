@@ -104,12 +104,9 @@ argdata_t *argdata_create_map(argdata_t const *const *keys,
 argdata_t *argdata_create_seq(argdata_t const *const *, size_t);
 
 // Create an argdata_t representing a string.
-// The string must be valid UTF-8.
+// Returns NULL and sets errno to EILSEQ if the string is not valid UTF-8.
 // The _c variant takes a null-terminated string, and calculates the size using
 // strlen().
-#ifdef LC_C_UNICODE_LOCALE
-// Returns NULL and sets errno to EILSEQ if the string is not valid UTF-8.
-#endif
 argdata_t *argdata_create_str(const char *, size_t);
 argdata_t *argdata_create_str_c(const char *);
 
@@ -172,12 +169,10 @@ int argdata_get_int_s(const argdata_t *, intmax_t *, intmax_t, intmax_t);
 int argdata_get_int_u(const argdata_t *, uintmax_t *, uintmax_t);
 
 // Get the string value of the argdata_t.
-// Returns 0 on succes, or EINVAL when the argdata_t isn't a string.
-// The _c variant returns EILSEQ if the string contains embedded null bytes.
+// Returns 0 on succes, EINVAL when the argdata_t isn't a string, or EILSEQ if
+// the string is not valid UTF-8. The _c variant also returns EILSEQ if the
+// string contains embedded null bytes.
 // The _c variant shouldn't be used on argdata_t created by argdata_create_str.
-#ifdef LC_C_UNICODE_LOCALE
-// Returns EILSEQ if the string is not valid UTF-8.
-#endif
 int argdata_get_str(const argdata_t *, const char **, size_t *);
 int argdata_get_str_c(const argdata_t *, const char **);
 
