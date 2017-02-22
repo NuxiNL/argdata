@@ -126,7 +126,7 @@ void argdata_free(argdata_t *);
 // argdata_t will be stored in *n_fds. This is not necessarily the same as the
 // amount of unique file descriptors, as multiple values can refer to the same
 // file descriptor.
-void argdata_get_buffer_length(const argdata_t *, size_t *size, size_t *n_fds);
+void argdata_serialized_length(const argdata_t *, size_t *size, size_t *n_fds);
 
 // Serialize the given argdata_t value into buf.
 // The number of bytes needed and used in buf can be determined with
@@ -140,7 +140,7 @@ void argdata_get_buffer_length(const argdata_t *, size_t *size, size_t *n_fds);
 // Use *n_fds of argdata_serialize_length to get an upper bound on the number
 // of unique file descriptors, to determine the size of the array.
 // If fds is NULL, 0 is returned.
-size_t argdata_get_buffer(const argdata_t *, void *buf, int *fds);
+size_t argdata_serialize(const argdata_t *, void *buf, int *fds);
 
 // Get the pointer and size to the binary data in the argdata_t.
 // On success, returns 0.
