@@ -107,6 +107,9 @@ argdata_t *argdata_create_seq(argdata_t const *const *, size_t);
 // Returns NULL and sets errno to EILSEQ if the string is not valid UTF-8.
 // The _c variant takes a null-terminated string, and calculates the size using
 // strlen().
+// When using the first version, argdata_get_str_c can only be used on the
+// result if the buffer is followed by a null char. If you're only going to use
+// argdata_serialize and argdata_get_str on the result, this is not an issue.
 argdata_t *argdata_create_str(const char *, size_t);
 argdata_t *argdata_create_str_c(const char *);
 
@@ -172,7 +175,8 @@ int argdata_get_int_u(const argdata_t *, uintmax_t *, uintmax_t);
 // Returns 0 on succes, EINVAL when the argdata_t isn't a string, or EILSEQ if
 // the string is not valid UTF-8. The _c variant also returns EILSEQ if the
 // string contains embedded null bytes.
-// The _c variant shouldn't be used on argdata_t created by argdata_create_str.
+// The _c variant shouldn't be used on argdata_t created by argdata_create_str,
+// if the original buffer isn't followed by a null char.
 int argdata_get_str(const argdata_t *, const char **, size_t *);
 int argdata_get_str_c(const argdata_t *, const char **);
 
