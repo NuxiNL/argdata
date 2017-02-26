@@ -60,11 +60,9 @@ struct argdata_t {
 	static std::unique_ptr<argdata_t> create_float(double v) {
 		return std::unique_ptr<argdata_t>(argdata_create_float(v));
 	}
-	static std::unique_ptr<argdata_t> create_int(std::uintmax_t v) {
-		return std::unique_ptr<argdata_t>(argdata_create_int_s(v));
-	}
-	static std::unique_ptr<argdata_t> create_int(std::intmax_t v) {
-		return std::unique_ptr<argdata_t>(argdata_create_int_u(v));
+	template<typename T>
+	static std::unique_ptr<argdata_t> create_int(T const &v) {
+		return std::unique_ptr<argdata_t>(argdata_create_int(v));
 	}
 	static std::unique_ptr<argdata_t> create_int(int v) {
 		return std::unique_ptr<argdata_t>(argdata_create_int_s(v));
