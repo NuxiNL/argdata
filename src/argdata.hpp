@@ -119,17 +119,10 @@ public:
 		if (argdata_get_float(this, &r)) return {};
 		return r;
 	}
-	mstd::optional<std::intmax_t> get_int() const {
-		std::intmax_t r;
-		std::intmax_t const min = std::numeric_limits<std::intmax_t>::min();
-		std::intmax_t const max = std::numeric_limits<std::intmax_t>::max();
-		if (argdata_get_int_s(this, &r, min, max)) return {};
-		return r;
-	}
-	mstd::optional<std::uintmax_t> get_uint() const {
-		std::uintmax_t r;
-		std::uintmax_t const max = std::numeric_limits<std::uintmax_t>::max();
-		if (argdata_get_int_u(this, &r, max)) return {};
+	template <typename T>
+	mstd::optional<T> get_int() const {
+		T r;
+		if (argdata_get_int(this, &r)) return {};
 		return r;
 	}
 	mstd::optional<mstd::string_view> get_str() const {
@@ -149,8 +142,8 @@ public:
 	bool                             as_bool     () const { return get_bool     ().value_or(              false); }
 	int                              as_fd       () const { return get_fd       ().value_or(                 -1); }
 	double                           as_float    () const { return get_float    ().value_or(                0.0); }
-	std::intmax_t                    as_int      () const { return get_int      ().value_or(                  0); }
-	std::uintmax_t                   as_uint     () const { return get_uint     ().value_or(                  0); }
+	template <typename T>
+	T                                as_int      () const { return get_int<T>   ().value_or(                  0); }
 	mstd::string_view                as_str      () const { return get_str      ().value_or(mstd::string_view{}); }
 	timespec                         as_timestamp() const { return get_timestamp().value_or(         timespec{}); }
 
