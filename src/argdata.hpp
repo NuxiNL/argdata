@@ -38,9 +38,8 @@
 #include <mstd/range.hpp>
 #include <mstd/string_view.hpp>
 
-class argdata_t {
+struct argdata_t {
 
-public:
 	argdata_t() = delete;
 	argdata_t(argdata_t const &) = delete;
 	argdata_t &operator=(argdata_t const &) = delete;
