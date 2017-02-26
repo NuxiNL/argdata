@@ -119,7 +119,7 @@ public:
 		if (argdata_get_float(this, &r)) return {};
 		return r;
 	}
-	template <typename T>
+	template<typename T>
 	mstd::optional<T> get_int() const {
 		T r;
 		if (argdata_get_int(this, &r)) return {};
@@ -142,8 +142,7 @@ public:
 	bool                             as_bool     () const { return get_bool     ().value_or(              false); }
 	int                              as_fd       () const { return get_fd       ().value_or(                 -1); }
 	double                           as_float    () const { return get_float    ().value_or(                0.0); }
-	template <typename T>
-	T                                as_int      () const { return get_int<T>   ().value_or(                  0); }
+	template<typename T> T           as_int      () const { return get_int<T>   ().value_or(                  0); }
 	mstd::string_view                as_str      () const { return get_str      ().value_or(mstd::string_view{}); }
 	timespec                         as_timestamp() const { return get_timestamp().value_or(         timespec{}); }
 
