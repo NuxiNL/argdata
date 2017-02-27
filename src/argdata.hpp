@@ -308,12 +308,12 @@ struct argdata_t {
 		return r;
 	}
 
-	void encode(std::vector<unsigned char> &buffer) const {
+	void serialize(std::vector<unsigned char> &buffer) const {
 		buffer.resize(serialized_length());
 		argdata_serialize(this, buffer.data(), nullptr);
 	}
 
-	void encode(std::vector<unsigned char> &buffer, std::vector<int> &fds) const {
+	void serialize(std::vector<unsigned char> &buffer, std::vector<int> &fds) const {
 		size_t n_fds;
 		buffer.resize(serialized_length(&n_fds));
 		fds.resize(n_fds);
@@ -321,10 +321,10 @@ struct argdata_t {
 		fds.resize(n_fds);
 	}
 
-	std::vector<unsigned char> encode(std::vector<int> *fds = nullptr) const {
+	std::vector<unsigned char> serialize(std::vector<int> *fds = nullptr) const {
 		std::vector<unsigned char> buffer;
-		if (fds) encode(buffer, *fds);
-		else encode(buffer);
+		if (fds) serialize(buffer, *fds);
+		else serialize(buffer);
 		return buffer;
 	}
 
