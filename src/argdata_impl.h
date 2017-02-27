@@ -45,7 +45,7 @@ struct argdata_map_iterator_impl {
     const uint8_t *buf;
     const argdata_t *const *keys;
   };
-  const argdata_t *const *values; // When NULL, we're iterating a buffer.
+  const argdata_t *const *values;  // When NULL, we're iterating a buffer.
   size_t len;
   argdata_t key;
   argdata_t value;
@@ -64,7 +64,7 @@ static_assert(offsetof(struct argdata_map_iterator_impl, error) ==
 struct argdata_seq_iterator_impl {
   alignas(long) int error;
   const uint8_t *buf;
-  const argdata_t *const *entries; // When NULL, we're iterating a buffer.
+  const argdata_t *const *entries;  // When NULL, we're iterating a buffer.
   size_t len;
   argdata_t value;
 };
