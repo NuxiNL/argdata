@@ -148,5 +148,5 @@ as opposed to integers which use only as many bytes as needed. The reason for
 this, is to allow substitution of file descriptors in encoded argdata. If the
 file descriptors were variable length, changing the value could involve
 resizing and thus re-encoding (part of) the argdata. Being able to substitute
-the these values is useful since in many cases file descriptor numbers cannot
+these values is useful since in many cases file descriptor numbers cannot
 be chosen freely.
