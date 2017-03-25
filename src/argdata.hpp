@@ -26,6 +26,7 @@
 
 #include <time.h>
 
+#include <chrono>
 #include <cstdint>
 #include <iterator>
 #include <limits>
@@ -39,6 +40,8 @@
 #include <mstd/string_view.hpp>
 
 struct argdata_t {
+
+	typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> timestamp;
 
 	argdata_t() = delete;
 	argdata_t(argdata_t const &) = delete;
@@ -70,8 +73,12 @@ struct argdata_t {
 	static std::unique_ptr<argdata_t> create_str(mstd::string_view v) {
 		return std::unique_ptr<argdata_t>(argdata_create_str(v.data(), v.size()));
 	}
-	static std::unique_ptr<argdata_t> create_timestamp(timespec const & v) {
-		return std::unique_ptr<argdata_t>(argdata_create_timestamp(&v));
+	static std::unique_ptr<argdata_t> create_timestamp(timestamp const & v) {
+		std::chrono::nanoseconds d = v.time_since_epoch();
+		timespec ts;
+		ts.tv_sec = d.count() / 1000000000;
+		ts.tv_nsec = d.count() % 1000000000;
+		return std::unique_ptr<argdata_t>(argdata_create_timestamp(&ts));
 	}
 
 	static std::unique_ptr<argdata_t> create_map(
@@ -128,10 +135,10 @@ struct argdata_t {
 		if (argdata_get_str(this, &data, &size)) return {};
 		return mstd::string_view(data, size);
 	}
-	mstd::optional<timespec> get_timestamp() const {
+	mstd::optional<timestamp> get_timestamp() const {
 		timespec r;
 		if (argdata_get_timestamp(this, &r)) return {};
-		return r;
+		return timestamp(std::chrono::seconds(r.tv_sec) + std::chrono::nanoseconds(r.tv_nsec));
 	}
 
 	// Same as above, but return a default value (empty/zero/etc.) instead of nullopt.
@@ -141,7 +148,7 @@ struct argdata_t {
 	double                           as_float    () const { return get_float    ().value_or(                0.0); }
 	template<typename T> T           as_int      () const { return get_int<T>   ().value_or(                  0); }
 	mstd::string_view                as_str      () const { return get_str      ().value_or(mstd::string_view{}); }
-	timespec                         as_timestamp() const { return get_timestamp().value_or(         timespec{}); }
+	timestamp                        as_timestamp() const { return get_timestamp().value_or(        timestamp{}); }
 
 	class map;
 	class seq;
