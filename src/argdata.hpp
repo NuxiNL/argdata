@@ -51,8 +51,8 @@ struct argdata_t {
 		argdata_free(static_cast<argdata_t *>(p));
 	}
 
-	static std::unique_ptr<argdata_t> create_from_buffer(mstd::range<unsigned char const> r) {
-		return std::unique_ptr<argdata_t>(argdata_from_buffer(r.data(), r.size()));
+	static std::unique_ptr<argdata_t> create_from_buffer(mstd::range<unsigned char const> r, int (*convert_fd)(void *, size_t), void *convert_fd_arg) {
+		return std::unique_ptr<argdata_t>(argdata_from_buffer(r.data(), r.size(), convert_fd, convert_fd_arg));
 	}
 	static std::unique_ptr<argdata_t> create_binary(mstd::range<unsigned char const> r) {
 		return std::unique_ptr<argdata_t>(argdata_create_binary(r.data(), r.size()));
