@@ -33,11 +33,20 @@ add_library(argdata
 	src/argdata_map_next.c
 	src/argdata_null.c
 	src/argdata_print_yaml.c
+	src/argdata_reader_create.c
+	src/argdata_reader_free.c
+	src/argdata_reader_get.c
+	src/argdata_reader_pull.c
+	src/argdata_reader_release_fd.c
 	src/argdata_seq_iterate.c
 	src/argdata_seq_next.c
 	src/argdata_serialize.c
 	src/argdata_serialized_length.c
 	src/argdata_true.c
+	src/argdata_writer_create.c
+	src/argdata_writer_free.c
+	src/argdata_writer_push.c
+	src/argdata_writer_set.c
 )
 
 target_link_libraries(argdata m)
