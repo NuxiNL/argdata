@@ -205,7 +205,7 @@ static inline int parse_fd(uint32_t *value, const uint8_t **buf, size_t *len) {
   return 0;
 }
 
-static inline void encode_fd(int value, uint8_t **buf) {
+static inline void encode_fd(uint32_t value, uint8_t **buf) {
   *(*buf)++ = value >> 24;
   *(*buf)++ = value >> 16;
   *(*buf)++ = value >> 8;
