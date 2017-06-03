@@ -10,7 +10,7 @@
 
 static void encode_subfield(const argdata_t *, uint8_t **, int *, size_t *);
 
-static int map_fd(int fd, int *fds, size_t *fdslen) {
+static size_t map_fd(int fd, int *fds, size_t *fdslen) {
   for (size_t i = 0; i < *fdslen; ++i)
     if (fds[i] == fd)
       return i;
@@ -27,7 +27,7 @@ static void encode(const argdata_t *ad, uint8_t *buf, int *fds,
 
   switch (ad->type) {
     case AD_BUFFER: {
-      const uint8_t *ibuf = ad->buffer;
+      const uint8_t *ibuf = ad->buffer.buffer;
       size_t ilen = ad->length;
 
       if (fds != NULL) {
@@ -39,7 +39,8 @@ static void encode(const argdata_t *ad, uint8_t *buf, int *fds,
             // Scan map and sequence entries for file descriptors.
             for (;;) {
               argdata_t iad;
-              if (parse_subfield(&iad, &ibuf, &ilen) != 0)
+              if (parse_subfield(&iad, &ibuf, &ilen, ad->buffer.convert_fd,
+                                 ad->buffer.convert_fd_arg) != 0)
                 break;
               encode_subfield(&iad, &buf, fds, fdslen);
             }
@@ -47,9 +48,12 @@ static void encode(const argdata_t *ad, uint8_t *buf, int *fds,
           }
           case ADT_FD: {
             // Remap file descriptors to be sequential starting at zero.
-            int fd;
+            uint32_t fd;
             if (parse_fd(&fd, &ibuf, &ilen) == 0)
-              encode_fd(map_fd(fd, fds, fdslen), &buf);
+              encode_fd(
+                  map_fd(ad->buffer.convert_fd(ad->buffer.convert_fd_arg, fd),
+                         fds, fdslen),
+                  &buf);
             break;
           }
         }

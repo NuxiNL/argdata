@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Nuxi, https://nuxi.nl/
+// Copyright (c) 2015-2017 Nuxi, https://nuxi.nl/
 //
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
@@ -9,9 +9,13 @@
 
 #include "argdata_impl.h"
 
+static int fixed_fd(void *arg, size_t fd) {
+  return (intptr_t)arg;
+}
+
 argdata_t *argdata_create_fd(int value) {
   // We should only refer to valid file descriptors.
-  if (value < 0 || (uintmax_t)value > UINT32_MAX) {
+  if (value < 0) {
     errno = EBADF;
     return NULL;
   }
@@ -26,10 +30,12 @@ argdata_t *argdata_create_fd(int value) {
   // to change radically.
   uint8_t *bufstart = (uint8_t *)(ad + 1), *buf = bufstart;
   *buf++ = ADT_FD;
-  encode_fd(value, &buf);
+  encode_fd(0, &buf);
 
   ad->type = AD_BUFFER;
-  ad->buffer = bufstart;
+  ad->buffer.buffer = bufstart;
   ad->length = buf - bufstart;
+  ad->buffer.convert_fd = fixed_fd;
+  ad->buffer.convert_fd_arg = (void *)(intptr_t)value;
   return ad;
 }

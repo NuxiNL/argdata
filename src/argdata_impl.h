@@ -22,9 +22,13 @@
 struct argdata_t {
   enum { AD_BUFFER, AD_BINARY, AD_MAP, AD_SEQ, AD_STR } type;
   union {
-    const uint8_t *buffer;  // Buffer to code.
-    const void *binary;     // Binary block of data.
-    const char *str;        // UTF-8 string.
+    struct {
+      const uint8_t *buffer;
+      int (*convert_fd)(void *, size_t);
+      void *convert_fd_arg;
+    } buffer;            // Buffer of already serialized data.
+    const void *binary;  // Binary block of data.
+    const char *str;     // UTF-8 string.
     struct {
       argdata_t const *const *keys;
       argdata_t const *const *values;
@@ -47,6 +51,8 @@ struct argdata_map_iterator_impl {
   };
   const argdata_t *const *values;  // When NULL, we're iterating a buffer.
   size_t len;
+  int (*convert_fd)(void *, size_t);
+  void *convert_fd_arg;
   argdata_t key;
   argdata_t value;
 };
@@ -66,6 +72,8 @@ struct argdata_seq_iterator_impl {
   const uint8_t *buf;
   const argdata_t *const *entries;  // When NULL, we're iterating a buffer.
   size_t len;
+  int (*convert_fd)(void *, size_t);
+  void *convert_fd_arg;
   argdata_t value;
 };
 
@@ -92,15 +100,21 @@ enum {
 };
 
 static inline void argdata_init_buffer(argdata_t *ad, const void *buffer,
-                                       size_t length) {
+                                       size_t length,
+                                       int (*convert_fd)(void *, size_t),
+                                       void *convert_fd_arg) {
   ad->type = AD_BUFFER;
-  ad->buffer = buffer;
+  ad->buffer.buffer = buffer;
   ad->length = length;
+  ad->buffer.convert_fd = convert_fd;
+  ad->buffer.convert_fd_arg = convert_fd_arg;
 }
 
 // Parses a field embedded in the input stream.
 static inline int parse_subfield(argdata_t *ad, const uint8_t **bufp,
-                                 size_t *lenp) {
+                                 size_t *lenp,
+                                 int (*convert_fd)(void *, size_t),
+                                 void *convert_fd_arg) {
   // Parse the field length. The length is stored in big endian form,
   // seven bits per byte. The top bit is used to indicate whether the
   // last byte of the field length has been reached.
@@ -136,7 +150,7 @@ static inline int parse_subfield(argdata_t *ad, const uint8_t **bufp,
     return EINVAL;
 
   // Successfully obtained a subfield.
-  argdata_init_buffer(ad, buf, reclen);
+  argdata_init_buffer(ad, buf, reclen, convert_fd, convert_fd_arg);
   *bufp = buf + reclen;
   *lenp = len - reclen;
   return 0;
@@ -181,14 +195,11 @@ static inline int parse_type(uint8_t type, const uint8_t **buf, size_t *len) {
 }
 
 // Parses a file descriptor number in the input stream.
-static inline int parse_fd(int *value, const uint8_t **buf, size_t *len) {
+static inline int parse_fd(uint32_t *value, const uint8_t **buf, size_t *len) {
   if (*len != sizeof(uint32_t))
     return EINVAL;
-  uint32_t fd = (uint32_t)(*buf)[0] << 24 | (uint32_t)(*buf)[1] << 16 |
-                (uint32_t)(*buf)[2] << 8 | (uint32_t)(*buf)[3];
-  if (fd > INT_MAX)
-    return EINVAL;
-  *value = fd;
+  *value = (uint32_t)(*buf)[0] << 24 | (uint32_t)(*buf)[1] << 16 |
+           (uint32_t)(*buf)[2] << 8 | (uint32_t)(*buf)[3];
   *buf += sizeof(uint32_t);
   *len = 0;
   return 0;

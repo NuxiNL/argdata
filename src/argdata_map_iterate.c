@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Nuxi (https://nuxi.nl/) and contributors.
+// Copyright (c) 2016-2017 Nuxi (https://nuxi.nl/) and contributors.
 //
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
@@ -13,8 +13,10 @@ int argdata_map_iterate(const argdata_t *ad, argdata_map_iterator_t *it_) {
       (struct argdata_map_iterator_impl *)it_;
   switch (ad->type) {
     case AD_BUFFER:
-      it->buf = ad->buffer;
+      it->buf = ad->buffer.buffer;
       it->len = ad->length;
+      it->convert_fd = ad->buffer.convert_fd;
+      it->convert_fd_arg = ad->buffer.convert_fd_arg;
       it->error = parse_type(ADT_MAP, &it->buf, &it->len);
       it->values = NULL;
       break;
