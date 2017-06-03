@@ -337,4 +337,53 @@ struct argdata_t {
 
 };
 
+struct argdata_reader_t {
+
+	argdata_reader_t() = delete;
+	argdata_reader_t(argdata_reader_t const &) = delete;
+	argdata_reader_t &operator=(argdata_reader_t const &) = delete;
+
+	void operator delete (void *p) {
+		argdata_reader_free(static_cast<argdata_reader_t *>(p));
+	}
+
+	static std::unique_ptr<argdata_reader_t> create(size_t max_data_len, size_t max_fds_len) {
+		return std::unique_ptr<argdata_reader_t>(argdata_reader_create(max_data_len, max_fds_len));
+	}
+
+	const argdata_t *get() {
+		return argdata_reader_get(this);
+	}
+	int pull(int fd) {
+		return argdata_reader_pull(this, fd);
+	}
+	void release_fd(int fd) {
+		argdata_reader_release_fd(this, fd);
+	}
+
+};
+
+struct argdata_writer_t {
+
+	argdata_writer_t() = delete;
+	argdata_writer_t(argdata_writer_t const &) = delete;
+	argdata_writer_t &operator=(argdata_writer_t const &) = delete;
+
+	void operator delete (void *p) {
+		argdata_writer_free(static_cast<argdata_writer_t *>(p));
+	}
+
+	static std::unique_ptr<argdata_writer_t> create() {
+		return std::unique_ptr<argdata_writer_t>(argdata_writer_create());
+	}
+
+	int push(int fd) {
+		return argdata_writer_push(this, fd);
+	}
+	void set(const argdata_t *ad) {
+		argdata_writer_set(this, ad);
+	}
+
+};
+
 #endif
