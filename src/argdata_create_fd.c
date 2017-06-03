@@ -25,9 +25,10 @@ argdata_t *argdata_create_fd(int value) {
   if (ad == NULL)
     return NULL;
 
-  // Store digits. File descriptors are stored as fixed length, so that
+  // File descriptors are stored as fixed length 32-bit numbers, so that
   // they can be substituted without causing the binary representation
-  // to change radically.
+  // to change radically. Just store the value zero for now, as the
+  // proper value will be filled in when serializing.
   uint8_t *bufstart = (uint8_t *)(ad + 1), *buf = bufstart;
   *buf++ = ADT_FD;
   encode_fd(0, &buf);
