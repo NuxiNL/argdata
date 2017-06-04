@@ -3,6 +3,7 @@
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
 
+#include <stddef.h>
 #include <stdlib.h>
 
 #include "argdata_reader_impl.h"
