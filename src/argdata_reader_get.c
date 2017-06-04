@@ -4,6 +4,7 @@
 // See the LICENSE file for details.
 
 #include <assert.h>
+#include <stddef.h>
 
 #include "argdata_reader_impl.h"
 
