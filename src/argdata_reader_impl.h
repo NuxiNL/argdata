@@ -8,6 +8,7 @@
 
 #include <sys/socket.h>
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "argdata.h"
