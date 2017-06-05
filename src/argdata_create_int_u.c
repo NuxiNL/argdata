@@ -35,8 +35,6 @@ argdata_t *argdata_create_int_u(uintmax_t value) {
   *--buf = ADT_INT;
   ++len;
 
-  ad->type = AD_BUFFER;
-  ad->buffer.buffer = buf;
-  ad->length = len;
+  argdata_init_buffer(ad, buf, len, NULL, NULL);
   return ad;
 }

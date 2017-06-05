@@ -74,7 +74,8 @@ extern "C" {
 // argdata_t object.
 // The convert_fd callback function is called when accessing file
 // descriptors. This function can be used to transform a file descriptor
-// number in the serialized data to its process-local value.
+// number in the serialized data to its process-local value. In case
+// convert_fd is NULL, access to file descriptors is disallowed entirely.
 argdata_t *argdata_from_buffer(const void *buf, size_t len,
                                int (*convert_fd)(void *, size_t),
                                void *convert_fd_arg);

@@ -9,6 +9,12 @@
 
 #include "argdata_impl.h"
 
+// File descriptors are stored as fixed length 32-bit numbers, so that
+// they can be substituted without causing the binary representation to
+// change radically. Simply use the value zero here, as the actual file
+// descriptor number will be filled in when serializing.
+static const uint8_t buf_fd[] = {ADT_FD, 0, 0, 0, 0};
+
 static int fixed_fd(void *arg, size_t fd) {
   return (intptr_t)arg;
 }
@@ -20,23 +26,10 @@ argdata_t *argdata_create_fd(int value) {
     return NULL;
   }
 
-  // Allocate object with space for encoded integer value.
-  argdata_t *ad = malloc(sizeof(*ad) + sizeof(uint32_t) + 1);
+  argdata_t *ad = malloc(sizeof(*ad));
   if (ad == NULL)
     return NULL;
-
-  // File descriptors are stored as fixed length 32-bit numbers, so that
-  // they can be substituted without causing the binary representation
-  // to change radically. Just store the value zero for now, as the
-  // proper value will be filled in when serializing.
-  uint8_t *bufstart = (uint8_t *)(ad + 1), *buf = bufstart;
-  *buf++ = ADT_FD;
-  encode_fd(0, &buf);
-
-  ad->type = AD_BUFFER;
-  ad->buffer.buffer = bufstart;
-  ad->length = buf - bufstart;
-  ad->buffer.convert_fd = fixed_fd;
-  ad->buffer.convert_fd_arg = (void *)(intptr_t)value;
+  argdata_init_buffer(ad, buf_fd, sizeof(buf_fd), fixed_fd,
+                      (void *)(intptr_t)value);
   return ad;
 }
