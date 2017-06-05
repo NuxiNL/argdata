@@ -3,6 +3,7 @@
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
 
+#include <errno.h>
 #include <float.h>
 #include <inttypes.h>
 #include <locale.h>
@@ -73,9 +74,13 @@ static void print_yaml(const argdata_t *ad, FILE *fp, unsigned int depth) {
   // Extension: file descriptors.
   {
     int value;
-    if (argdata_get_fd(ad, &value) == 0) {
-      fprintf(fp, "!fd \"%d\"", value);
-      return;
+    switch (argdata_get_fd(ad, &value)) {
+      case 0:
+        fprintf(fp, "!fd \"%d\"", value);
+        return;
+      case EBADF:
+        fprintf(fp, "!fd \"invalid\"");
+        return;
     }
   }
 
