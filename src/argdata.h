@@ -265,7 +265,7 @@ const argdata_t *argdata_reader_get(const argdata_reader_t *);
 // value or after destroying the reader. This function may only be
 // called on file descriptors that are owned by the reader. Future calls
 // to argdata_get_fd() on elements corresponding to the file descriptor
-// will fail.
+// will fail with EBADF.
 void argdata_reader_release_fd(argdata_reader_t *, int);
 
 // Reads the next argdata value (possibly partially) from a stream-based
