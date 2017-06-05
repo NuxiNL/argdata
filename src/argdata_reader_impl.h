@@ -21,11 +21,11 @@ struct argdata_reader_t {
   bool finished;   // Message present or at end-of-file.
   argdata_t root;  // The last received message.
 
-  unsigned char header[12];  // Bytes of the header received.
-  size_t header_len;         // Number of bytes of the header read.
-  size_t data_len;           // Number of bytes of the message read.
-  int *fds;                  // Process-local file descriptors in message.
-  size_t fds_len;            // Number of file descriptors received.
+  unsigned char header[8];  // Bytes of the header received.
+  size_t header_len;        // Number of bytes of the header read.
+  size_t data_len;          // Number of bytes of the message read.
+  int *fds;                 // Process-local file descriptors in message.
+  size_t fds_len;           // Number of file descriptors received.
 
   _Alignas(struct cmsghdr) char control[];  // Control message and message data.
 };

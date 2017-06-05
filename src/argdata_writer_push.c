@@ -22,7 +22,7 @@ int argdata_writer_push(argdata_writer_t *aw, int fd) {
 
     // Grow the internally allocated buffer to fit the serialized message.
     size_t max_control_size = CMSG_SPACE(fds_len * sizeof(int));
-    size_t data_size = 12 + data_len;
+    size_t data_size = 8 + data_len;
     size_t minimum_size = max_control_size + data_size;
     if (aw->buffer_size < minimum_size) {
       size_t new_buffer_size = 32;
@@ -44,11 +44,9 @@ int argdata_writer_push(argdata_writer_t *aw, int fd) {
         .msg_controllen = CMSG_SPACE(fds_len * sizeof(int)),
     };
     struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
-    fds_len =
-        argdata_serialize(aw->next, aw->data + 12, (int *)CMSG_DATA(cmsg));
+    fds_len = argdata_serialize(aw->next, aw->data + 8, (int *)CMSG_DATA(cmsg));
 
-    // Construct the message header, containing an eight-byte data
-    // length and a four-byte file descriptor count.
+    // Construct the message header, containing an eight-byte data length.
     aw->data_size = data_size;
     static_assert(SIZE_MAX <= UINT64_MAX, "Message size cannot be encoded");
     aw->data[0] = data_len >> 56;
@@ -59,12 +57,6 @@ int argdata_writer_push(argdata_writer_t *aw, int fd) {
     aw->data[5] = data_len >> 16;
     aw->data[6] = data_len >> 8;
     aw->data[7] = data_len;
-    static_assert(INT_MAX <= UINT32_MAX,
-                  "File descriptor count cannot be encoded");
-    aw->data[8] = fds_len >> 24;
-    aw->data[9] = fds_len >> 16;
-    aw->data[10] = fds_len >> 8;
-    aw->data[11] = fds_len;
 
     // Only provide a control message when sending file descriptors.
     if (fds_len > 0) {
