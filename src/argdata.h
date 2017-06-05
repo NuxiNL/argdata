@@ -174,8 +174,9 @@ int argdata_get_binary(const argdata_t *, const void **, size_t *);
 int argdata_get_bool(const argdata_t *, bool *);
 
 // Get the file descriptor represented by the argdata_t.
-// Returns 0 on success, or EINVAL if the argdata_t does not represent a file
-// descriptor.
+// Returns 0 on success, EINVAL if the argdata_t does not represent a
+// file descriptor, or EBADF if the file descriptor associated with the
+// object is not available within the current process.
 int argdata_get_fd(const argdata_t *, int *);
 
 // Get the floating point value of the argdata_t.

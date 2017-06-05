@@ -48,12 +48,16 @@ static void encode(const argdata_t *ad, uint8_t *buf, int *fds,
           }
           case ADT_FD: {
             // Remap file descriptors to be sequential starting at zero.
-            uint32_t fd;
-            if (parse_fd(&fd, &ibuf, &ilen) == 0)
-              encode_fd(
-                  map_fd(ad->buffer.convert_fd(ad->buffer.convert_fd_arg, fd),
-                         fds, fdslen),
-                  &buf);
+            // Map invalid file descriptors to index UINT32_MAX, so that
+            // they also appear as such when deserialized.
+            uint32_t raw_fd;
+            if (parse_fd(&raw_fd, &ibuf, &ilen) == 0) {
+              int fd = ad->buffer.convert_fd(ad->buffer.convert_fd_arg, raw_fd);
+              if (fd >= 0)
+                encode_fd(map_fd(fd, fds, fdslen), &buf);
+              else
+                encode_fd(UINT32_MAX, &buf);
+            }
             break;
           }
         }
