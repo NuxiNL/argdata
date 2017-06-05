@@ -34,8 +34,6 @@ argdata_t *argdata_create_float(double value) {
     bits >>= 8;
   }
 
-  ad->type = AD_BUFFER;
-  ad->buffer.buffer = buf;
-  ad->length = sizeof(uint64_t) + 1;
+  argdata_init_buffer(ad, buf, sizeof(uint64_t) + 1, NULL, NULL);
   return ad;
 }

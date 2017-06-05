@@ -50,8 +50,6 @@ argdata_t *argdata_create_timestamp(const struct timespec *ts) {
     ++buf;
   *--buf = ADT_TIMESTAMP;
 
-  ad->type = AD_BUFFER;
-  ad->buffer.buffer = buf;
-  ad->length = buf_end - buf;
+  argdata_init_buffer(ad, buf, buf_end - buf, NULL, NULL);
   return ad;
 }
