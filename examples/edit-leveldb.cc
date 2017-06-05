@@ -22,7 +22,7 @@
 //
 // Usage:
 //
-//     $ x86_64-unknown-cloudabi-c++ -std=c++1z -O2 
+//     $ x86_64-unknown-cloudabi-c++ -std=c++1z -O2 \
 //           -o edit-leveldb edit-leveldb.cc \
 //           -lleveldb -lsnappy -lboost_iostreams
 //     $ cat edit-leveldb.yaml
