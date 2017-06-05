@@ -54,6 +54,20 @@ typedef struct {
   char data[128];
 } argdata_seq_iterator_t;
 
+// A utility type for reading argdata values off any stream-based file
+// descriptor (e.g., a regular file, pipe or socket).
+#ifndef argdata_reader_t
+typedef struct argdata_reader_t argdata_reader_t;
+#define argdata_reader_t argdata_reader_t
+#endif
+
+// A utility type for writing argdata values to any stream-based file
+// descriptor (e.g., a regular file, pipe or socket).
+#ifndef argdata_writer_t
+typedef struct argdata_writer_t argdata_writer_t;
+#define argdata_writer_t argdata_writer_t
+#endif
+
 // The global constant representing a false boolean value.
 extern const argdata_t argdata_false;
 
@@ -229,6 +243,70 @@ bool argdata_seq_next(argdata_seq_iterator_t *it, const argdata_t **element);
 
 // Write a yaml representation of the argdata to the given file.
 void argdata_print_yaml(const argdata_t *, FILE *);
+
+// Creates a reader object, capable of reading argdata values from any
+// stream-based file descriptor, storing a single message at a time. The
+// maximum message size and number of file descriptors need to be
+// specified to prevent potential resource exhaustion.
+argdata_reader_t *argdata_reader_create(size_t max_data_len,
+                                        size_t max_fds_len);
+
+// Destroys a reader object, freeing the last read message and any
+// unreleased file descriptors (if any).
+void argdata_reader_free(argdata_reader_t *);
+
+// Returns the last argdata value read from a stream. This function can
+// only be called if the last call to argdata_reader_pull() returned
+// zero. This function returns NULL if argdata_reader_pull() encountered
+// end-of-file.
+const argdata_t *argdata_reader_get(const argdata_reader_t *);
+
+// Releases ownership of a file descriptor contained in the last argdata
+// value, so that it can continue to be used after reading the next
+// value or after destroying the reader. This function may only be
+// called on file descriptors that are owned by the reader. Future calls
+// to argdata_get_fd() on elements corresponding to the file descriptor
+// will fail with EBADF.
+void argdata_reader_release_fd(argdata_reader_t *, int);
+
+// Reads the next argdata value (possibly partially) from a stream-based
+// file descriptor. This function returns zero upon completing a message
+// or when reaching end-of-file while in the initial state. Calling this
+// function invalidates the previously read value and closes any
+// associated file descriptors that have not been released through
+// argdata_reader_release_fd().
+//
+// This function may return any error number returned by read() and
+// recvmsg(). Errors like EAGAIN and EWOULDBLOCK indicate that the
+// next message has only been read partially. In addition, it may return
+// EMSGSIZE when the message is too large to be processed by the reader.
+// EBADMSG may be returned when the message is malformed or truncated.
+int argdata_reader_pull(argdata_reader_t *, int);
+
+// Creates a writer object, capable of writing argdata values to any
+// stream-based file descriptor, storing a single (partially
+// transmitted) message at a time.
+argdata_writer_t *argdata_writer_create(void);
+
+// Destroys a writer object.
+void argdata_writer_free(argdata_writer_t *);
+
+// Writes the current argdata value (possibly partially) to a
+// stream-based file descriptor. This function returns zero upon
+// completing the transmission of the current message or if no message
+// has been set.
+//
+// This function may return any error number returned by write() and
+// sendmsg(). Errors like EAGAIN and EWOULDBLOCK indicate that the
+// current message has only been written partially. ENOTSOCK is returned
+// when attempting to write a message containing file descriptors
+// through a non-socket file descriptor.
+int argdata_writer_push(argdata_writer_t *, int);
+
+// Starts the transmission of a message. This function can only be
+// called once when the writer object is in the initial state or when
+// the previous call to argdata_writer_push() returned zero.
+void argdata_writer_set(argdata_writer_t *, const argdata_t *);
 
 #ifdef __cplusplus
 }
