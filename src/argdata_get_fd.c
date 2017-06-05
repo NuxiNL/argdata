@@ -26,7 +26,7 @@ int argdata_get_fd(const argdata_t *ad, int *value) {
       // Convert it to a process-local file descriptor number.
       int fd = ad->buffer.convert_fd(ad->buffer.convert_fd_arg, raw_fd);
       if (fd < 0)
-        return EINVAL;
+        return EBADF;
       *value = fd;
       return 0;
     }
