@@ -72,7 +72,13 @@ extern "C" {
 // the serialized data.
 // The data is not copied, only the pointer and size are stored in the
 // argdata_t object.
-argdata_t *argdata_from_buffer(const void *, size_t);
+// The convert_fd callback function is called when accessing file
+// descriptors. This function can be used to transform a file descriptor
+// number in the serialized data to its process-local value. In case
+// convert_fd is NULL, access to file descriptors is disallowed entirely.
+argdata_t *argdata_from_buffer(const void *buf, size_t len,
+                               int (*convert_fd)(void *, size_t),
+                               void *convert_fd_arg);
 
 // Create an argdata_t representing a binary value.
 // The data is not copied, only the pointer and size are stored in the
@@ -155,8 +161,9 @@ int argdata_get_binary(const argdata_t *, const void **, size_t *);
 int argdata_get_bool(const argdata_t *, bool *);
 
 // Get the file descriptor represented by the argdata_t.
-// Returns 0 on success, or EINVAL if the argdata_t does not represent a file
-// descriptor.
+// Returns 0 on success, EINVAL if the argdata_t does not represent a
+// file descriptor, or EBADF if the file descriptor associated with the
+// object is not available within the current process.
 int argdata_get_fd(const argdata_t *, int *);
 
 // Get the floating point value of the argdata_t.

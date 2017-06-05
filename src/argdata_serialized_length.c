@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Nuxi, https://nuxi.nl/
+// Copyright (c) 2015-2017 Nuxi, https://nuxi.nl/
 //
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
@@ -14,7 +14,7 @@ static size_t countfds(const argdata_t *ad) {
 
   switch (ad->type) {
     case AD_BUFFER: {
-      const uint8_t *ibuf = ad->buffer;
+      const uint8_t *ibuf = ad->buffer.buffer;
       size_t ilen = ad->length - 1;
 
       switch (*ibuf++) {
@@ -25,14 +25,15 @@ static size_t countfds(const argdata_t *ad) {
           size_t fdslen = 0;
           for (;;) {
             argdata_t iad;
-            if (parse_subfield(&iad, &ibuf, &ilen) != 0)
+            if (parse_subfield(&iad, &ibuf, &ilen, ad->buffer.convert_fd,
+                               ad->buffer.convert_fd_arg) != 0)
               return fdslen;
             fdslen += countfds(&iad);
           }
         }
         case ADT_FD: {
           // A file descriptor.
-          int fd;
+          uint32_t fd;
           return parse_fd(&fd, &ibuf, &ilen) == 0 ? 1 : 0;
         }
         default:

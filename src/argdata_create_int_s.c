@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Nuxi, https://nuxi.nl/
+// Copyright (c) 2015-2017 Nuxi, https://nuxi.nl/
 //
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
@@ -32,8 +32,6 @@ argdata_t *argdata_create_int_s(intmax_t value) {
   *--buf = ADT_INT;
   ++len;
 
-  ad->type = AD_BUFFER;
-  ad->buffer = buf;
-  ad->length = len;
+  argdata_init_buffer(ad, buf, len, NULL, NULL);
   return ad;
 }

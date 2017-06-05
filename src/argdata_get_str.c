@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Nuxi, https://nuxi.nl/
+// Copyright (c) 2015-2017 Nuxi, https://nuxi.nl/
 //
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
@@ -10,7 +10,7 @@
 int argdata_get_str(const argdata_t *ad, const char **value, size_t *valuelen) {
   switch (ad->type) {
     case AD_BUFFER: {
-      const uint8_t *buf = ad->buffer;
+      const uint8_t *buf = ad->buffer.buffer;
       size_t len = ad->length;
       int error = parse_type(ADT_STR, &buf, &len);
       if (error != 0)

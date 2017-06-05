@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Nuxi, https://nuxi.nl/
+// Copyright (c) 2015-2017 Nuxi, https://nuxi.nl/
 //
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
@@ -34,8 +34,6 @@ argdata_t *argdata_create_float(double value) {
     bits >>= 8;
   }
 
-  ad->type = AD_BUFFER;
-  ad->buffer = buf;
-  ad->length = sizeof(uint64_t) + 1;
+  argdata_init_buffer(ad, buf, sizeof(uint64_t) + 1, NULL, NULL);
   return ad;
 }
