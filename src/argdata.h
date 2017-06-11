@@ -68,6 +68,10 @@ typedef struct argdata_writer_t argdata_writer_t;
 #define argdata_writer_t argdata_writer_t
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // The global constant representing a false boolean value.
 extern const argdata_t argdata_false;
 
@@ -76,10 +80,6 @@ extern const argdata_t argdata_true;
 
 // The global constant representing no value.
 extern const argdata_t argdata_null;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 // Create a value from a buffer containing the serialized argdata.
 // The data is not decoded, the get and iterate functions operate directly on
