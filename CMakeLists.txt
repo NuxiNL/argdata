@@ -6,7 +6,7 @@ option(BUILD_SHARED_LIBS "Build as shared library" ON)
 
 include(GNUInstallDirs)
 
-add_library(argdata
+set(SRC
 	src/argdata_create_binary.c
 	src/argdata_create_fd.c
 	src/argdata_create_float.c
@@ -33,21 +33,31 @@ add_library(argdata
 	src/argdata_map_next.c
 	src/argdata_null.c
 	src/argdata_print_yaml.c
-	src/argdata_reader_create.c
-	src/argdata_reader_free.c
-	src/argdata_reader_get.c
-	src/argdata_reader_pull.c
-	src/argdata_reader_release_fd.c
 	src/argdata_seq_iterate.c
 	src/argdata_seq_next.c
 	src/argdata_serialize.c
 	src/argdata_serialized_length.c
 	src/argdata_true.c
-	src/argdata_writer_create.c
-	src/argdata_writer_free.c
-	src/argdata_writer_push.c
-	src/argdata_writer_set.c
 )
+
+include(CheckIncludeFile)
+check_include_file(sys/socket.h HAVE_SYSSOCKET)
+
+if(HAVE_SYSSOCKET)
+	list(APPEND SRC
+		src/argdata_reader_create.c
+		src/argdata_reader_free.c
+		src/argdata_reader_get.c
+		src/argdata_reader_pull.c
+		src/argdata_reader_release_fd.c
+		src/argdata_writer_create.c
+		src/argdata_writer_free.c
+		src/argdata_writer_push.c
+		src/argdata_writer_set.c
+	)
+endif()
+
+add_library(argdata ${SRC})
 
 if(!MSVC)
 	target_link_libraries(argdata m)
