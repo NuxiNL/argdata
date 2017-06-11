@@ -11,13 +11,16 @@
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
-#include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
 #include "argdata.h"
+
+#if !defined(alignof) && defined(_MSC_VER)
+#define alignof __alignof
+#endif
 
 struct argdata_t {
   enum { AD_BUFFER, AD_BINARY, AD_MAP, AD_SEQ, AD_STR } type;
@@ -44,7 +47,7 @@ struct argdata_t {
 };
 
 struct argdata_map_iterator_impl {
-  alignas(long) int error;
+  ARGDATA_MAX_ALIGN int error;
   union {
     const uint8_t *buf;
     const argdata_t *const *keys;
@@ -68,7 +71,7 @@ static_assert(offsetof(struct argdata_map_iterator_impl, error) ==
               "Invalid offset");
 
 struct argdata_seq_iterator_impl {
-  alignas(long) int error;
+  ARGDATA_MAX_ALIGN int error;
   const uint8_t *buf;
   const argdata_t *const *entries;  // When NULL, we're iterating a buffer.
   size_t len;

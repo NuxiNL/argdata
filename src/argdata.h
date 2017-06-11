@@ -25,10 +25,17 @@
 #define ARGDATA_H
 
 #include <limits.h>
-#include <stdalign.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+
+#ifdef _MSC_VER
+#define ARGDATA_MAX_ALIGN __declspec(align(8))
+#else
+#include <stdalign.h>
+#define ARGDATA_MAX_ALIGN alignas(max_align_t)
+#endif
 
 struct timespec;
 
@@ -43,14 +50,14 @@ typedef struct argdata_t argdata_t;
 // The (mostly opaque) type representing an iterator into an argdata_t map.
 // See argdata_map_iterate and argdata_map_next.
 typedef struct {
-  alignas(long) int error;
+  ARGDATA_MAX_ALIGN int error;
   char data[128];
 } argdata_map_iterator_t;
 
 // The (mostly opaque) type representing an iterator into an argdata_t sequence.
 // See argdata_seq_iterate and argdata_seq_next.
 typedef struct {
-  alignas(long) int error;
+  ARGDATA_MAX_ALIGN int error;
   char data[128];
 } argdata_seq_iterator_t;
 
