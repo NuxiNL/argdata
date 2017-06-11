@@ -49,7 +49,9 @@ add_library(argdata
 	src/argdata_writer_set.c
 )
 
-target_link_libraries(argdata m)
+if(!MSVC)
+	target_link_libraries(argdata m)
+endif()
 
 target_include_directories(argdata PUBLIC src)
 
