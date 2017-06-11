@@ -10,36 +10,6 @@
 
 #include "argdata_impl.h"
 
-// clang-format off
-#define NUMERIC_MIN(t)             \
-  _Generic((t)0,                   \
-           char: CHAR_MIN,         \
-           signed char: SCHAR_MIN, \
-           unsigned char: 0,       \
-           short: SHRT_MIN,        \
-           unsigned short: 0,      \
-           int: INT_MIN,           \
-           unsigned int: 0,        \
-           long: LONG_MIN,         \
-           unsigned long: 0,       \
-           long long: LLONG_MIN,   \
-           unsigned long long: 0)
-
-#define NUMERIC_MAX(t)                \
-  _Generic((t)0,                      \
-           char: CHAR_MAX,            \
-           signed char: SCHAR_MAX,    \
-           unsigned char: UCHAR_MAX,  \
-           short: SHRT_MAX,           \
-           unsigned short: USHRT_MAX, \
-           int: INT_MAX,              \
-           unsigned int: UINT_MAX,    \
-           long: LONG_MAX,            \
-           unsigned long: ULONG_MAX,  \
-           long long: LLONG_MAX,      \
-           unsigned long long: ULLONG_MAX)
-// clang-format on
-
 int argdata_get_timestamp(const argdata_t *ad, struct timespec *value) {
   switch (ad->type) {
     case AD_BUFFER: {
@@ -89,9 +59,10 @@ int argdata_get_timestamp(const argdata_t *ad, struct timespec *value) {
       if (low > (uint64_t)INT64_MAX || (high << 32) > INT64_MAX - (int64_t)low)
         return ERANGE;
       sec = low + (high << 32);
-      if (sec < NUMERIC_MIN(time_t) || sec > NUMERIC_MAX(time_t))
+      time_t t_sec = sec;
+      if ((t_sec < 0) != (sec < 0) || (int64_t)t_sec != sec)
         return ERANGE;
-      *value = (struct timespec){.tv_sec = sec, .tv_nsec = nsec};
+      *value = (struct timespec){.tv_sec = t_sec, .tv_nsec = nsec};
       return 0;
     }
     default:

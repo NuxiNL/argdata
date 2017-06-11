@@ -131,18 +131,18 @@ static void print_yaml(const argdata_t *ad, FILE *fp, unsigned int depth) {
 
   // Signed integers.
   {
-    intmax_t value;
-    if (argdata_get_int(ad, &value) == 0) {
-      fprintf(fp, "!!int \"%jd\"", value);
+    long long value;
+    if (argdata_get_int_llong(ad, &value) == 0) {
+      fprintf(fp, "!!int \"%lld\"", value);
       return;
     }
   }
 
   // Unsigned integers.
   {
-    uintmax_t value;
-    if (argdata_get_int(ad, &value) == 0) {
-      fprintf(fp, "!!int \"%ju\"", value);
+    unsigned long long value;
+    if (argdata_get_int_ullong(ad, &value) == 0) {
+      fprintf(fp, "!!int \"%llu\"", value);
       return;
     }
   }
