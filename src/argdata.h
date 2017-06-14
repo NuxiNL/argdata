@@ -213,44 +213,44 @@ int argdata_get_str_c(const argdata_t *, const char **);
 // EINVAL if the argdata_t isn't a timestamp.
 int argdata_get_timestamp(const argdata_t *, struct timespec *);
 
-// Initialize a argdata_map_iterator to iterate over the given map.
-// Stores 0 in it->error on success, or EINVAL when the argdata_t isn't a map.
-// On error, the iterator is still initialized, but to iterate over an empty
-// map instead.
+// Initializes a map iterator to point to the first entry in a map.
+// Stores 0 in it->error on success, or EINVAL when the argdata_t isn't
+// a map. On error, the iterator is still initialized, but to iterate
+// over an empty map instead.
 void argdata_map_iterate(const argdata_t *, argdata_map_iterator_t *it);
 
+// Extracts the key and value of the map entry currently referenced by
+// the map iterator and stores them in *key and *value. Returns true if
+// the iterator points to a valid map entry. Returns false if the
+// iterator is past the final map entry.
 bool argdata_map_get(const argdata_map_iterator_t *it, const argdata_t **key,
                      const argdata_t **value);
 
-// Read the next element of a map.
-// Use argdata_map_iterate to (re)initialize an iterator to (re)start iterating
-// over a map.
-// For every key-value pair, the key and value are stored in *key and *value,
-// and true is returned. The returned *key and *value may be invalidated when
-// the iterator is advanced or reset.
-// When no more key-value pairs are left, false is returned.
-// When corrupted data (data not encoding a subfield, or a key without a value)
-// is encountered, false is returned and it->error is set to EINVAL.
+// Progresses a map iterator to the next element in the map. Use
+// argdata_map_iterate to (re)initialize an iterator to (re)start
+// iterating over a map. When corrupted data (data not encoding a
+// subfield, or a key without a value) is encountered, it->error is set
+// to EINVAL.
 void argdata_map_next(argdata_map_iterator_t *it);
 
-// Initialize a argdata_seq_iterator to iterate over the given sequence.
-// Stores 0 in it->error on success, or EINVAL when the argdata_t isn't
-// a sequence. On error, the iterator is still initialized, but to
-// iterate over an empty sequence instead.
+// Initializes a sequence iterator to point to the first entry in a
+// sequence. Stores 0 in it->error on success, or EINVAL when the
+// argdata_t isn't a sequence. On error, the iterator is still
+// initialized, but to iterate over an empty sequence instead.
 void argdata_seq_iterate(const argdata_t *, argdata_seq_iterator_t *it);
 
+// Extracts the value of the sequence entry currently referenced by the
+// map iterator and stores it in *element. Returns true if the iterator
+// points to a valid sequence entry. Returns false if the iterator is
+// past the final sequence entry.
 bool argdata_seq_get(const argdata_seq_iterator_t *it,
                      const argdata_t **element);
 
-// Read the next element of a seq.
-// Use argdata_seq_iterate to (re)initialize an iterator to (re)start iterating
-// over a seq.
-// For every element, the element is stored in *element, and true is returned.
-// The returned *element may be invalidated when the iterator is advanced or
-// reset.
-// When no more elements are left, false is returned.
-// When corrupted data (data not encoding a subfield) is encountered, false is
-// returned and it->error is set to EINVAL.
+// Progresses a sequence iterator to the next element in the sequence.
+// Use argdata_seq_iterate to (re)initialize an iterator to (re)start
+// iterating over a sequence. When corrupted data (data not encoding a
+// subfield, or a key without a value) is encountered, it->error is set
+// to EINVAL.
 void argdata_seq_next(argdata_seq_iterator_t *it);
 
 // Write a yaml representation of the argdata to the given file.
