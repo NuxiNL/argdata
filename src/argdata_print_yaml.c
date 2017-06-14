@@ -151,7 +151,7 @@ static void print_yaml(const argdata_t *ad, FILE *fp, unsigned int depth) {
   {
     argdata_map_iterator_t it;
     argdata_map_iterate(ad, &it);
-    if (it.error != 0) {
+    if (it.error == 0) {
       const argdata_t *key;
       const argdata_t *value;
       size_t index = 0;
