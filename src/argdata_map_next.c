@@ -16,6 +16,7 @@ void argdata_map_next(argdata_map_iterator_t *it_) {
         (it->error = parse_subfield(&it->buffer.value, &it->buffer.buffer,
                                     &it->buffer.length, it->buffer.convert_fd,
                                     it->buffer.convert_fd_arg)) != 0) {
+      // Failed to load next map entry. Return an empty map.
       it->type = ADM_MAP;
       it->map.count = 0;
     }

@@ -13,6 +13,7 @@ void argdata_seq_next(argdata_seq_iterator_t *it_) {
         (it->error = parse_subfield(&it->buffer.entry, &it->buffer.buffer,
                                     &it->buffer.length, it->buffer.convert_fd,
                                     it->buffer.convert_fd_arg)) != 0) {
+      // Failed to load next sequence entry. Return an empty sequence.
       it->type = ADS_SEQ;
       it->seq.count = 0;
     }
