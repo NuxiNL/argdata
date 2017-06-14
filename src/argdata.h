@@ -25,10 +25,17 @@
 #define ARGDATA_H
 
 #include <limits.h>
-#include <stdalign.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+
+#ifdef _MSC_VER
+#define ARGDATA_MAX_ALIGN __declspec(align(8))
+#else
+#include <stdalign.h>
+#define ARGDATA_MAX_ALIGN alignas(max_align_t)
+#endif
 
 struct timespec;
 
@@ -43,14 +50,14 @@ typedef struct argdata_t argdata_t;
 // The (mostly opaque) type representing an iterator into an argdata_t map.
 // See argdata_map_iterate, argdata_map_get and argdata_map_next.
 typedef struct {
-  alignas(long) int error;
+  ARGDATA_MAX_ALIGN int error;
   char data[128];
 } argdata_map_iterator_t;
 
 // The (mostly opaque) type representing an iterator into an argdata_t sequence.
 // See argdata_seq_iterate, argdata_seq_get and argdata_seq_next.
 typedef struct {
-  alignas(long) int error;
+  ARGDATA_MAX_ALIGN int error;
   char data[128];
 } argdata_seq_iterator_t;
 
@@ -68,6 +75,10 @@ typedef struct argdata_writer_t argdata_writer_t;
 #define argdata_writer_t argdata_writer_t
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // The global constant representing a false boolean value.
 extern const argdata_t argdata_false;
 
@@ -76,10 +87,6 @@ extern const argdata_t argdata_true;
 
 // The global constant representing no value.
 extern const argdata_t argdata_null;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 // Create a value from a buffer containing the serialized argdata.
 // The data is not decoded, the get and iterate functions operate directly on
