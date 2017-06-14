@@ -184,7 +184,7 @@ static void print_yaml(const argdata_t *ad, FILE *fp, unsigned int depth) {
   {
     argdata_seq_iterator_t it;
     argdata_seq_iterate(ad, &it);
-    if (it.error != 0) {
+    if (it.error == 0) {
       const argdata_t *value;
       size_t index = 0;
       while (argdata_seq_get(&it, &value)) {
