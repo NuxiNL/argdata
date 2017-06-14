@@ -4,35 +4,38 @@
 // See the LICENSE file for details.
 
 #include <errno.h>
-#include <stdint.h>
 
 #include "argdata_impl.h"
 
-int argdata_seq_iterate(const argdata_t *ad, argdata_seq_iterator_t *it_) {
+void argdata_seq_iterate(const argdata_t *ad, argdata_seq_iterator_t *it_) {
   struct argdata_seq_iterator_impl *it =
       (struct argdata_seq_iterator_impl *)it_;
   switch (ad->type) {
-    case AD_BUFFER:
-      it->buf = ad->buffer.buffer;
-      it->len = ad->length;
-      it->convert_fd = ad->buffer.convert_fd;
-      it->convert_fd_arg = ad->buffer.convert_fd_arg;
-      it->error = parse_type(ADT_SEQ, &it->buf, &it->len);
-      it->entries = NULL;
+    case AD_BUFFER: {
+      it->buffer.buffer = ad->buffer.buffer;
+      it->buffer.length = ad->length;
+      it->buffer.convert_fd = ad->buffer.convert_fd;
+      it->buffer.convert_fd_arg = ad->buffer.convert_fd_arg;
+      it->error = parse_type(ADT_SEQ, &it->buffer.buffer, &it->buffer.length);
+      if (it->error == 0) {
+        it->type = ADS_BUFFER;
+        argdata_seq_next(it_);
+      } else {
+        it->type = ADS_SEQ;
+        it->seq.count = 0;
+      }
       break;
+    }
     case AD_SEQ:
-      it->entries = ad->seq.entries;
-      it->len = ad->seq.count;
       it->error = 0;
+      it->type = ADS_SEQ;
+      it->seq.entries = ad->seq.entries;
+      it->seq.count = ad->seq.count;
       break;
     default:
       it->error = EINVAL;
+      it->type = ADS_SEQ;
+      it->seq.count = 0;
       break;
   }
-  if (it->error != 0) {
-    // If the iterator is invalid, set len to zero so that calls to
-    // argdata_seq_next() act as if iterating an empty sequence.
-    it->len = 0;
-  }
-  return it->error;
 }

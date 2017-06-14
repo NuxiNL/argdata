@@ -45,16 +45,22 @@ struct argdata_t {
 
 struct argdata_map_iterator_impl {
   alignas(long) int error;
+  enum { ADM_BUFFER, ADM_MAP } type;
   union {
-    const uint8_t *buf;
-    const argdata_t *const *keys;
+    struct {
+      const uint8_t *buffer;
+      size_t length;
+      int (*convert_fd)(void *, size_t);
+      void *convert_fd_arg;
+      argdata_t key;
+      argdata_t value;
+    } buffer;
+    struct {
+      const argdata_t *const *keys;
+      const argdata_t *const *values;
+      size_t count;
+    } map;
   };
-  const argdata_t *const *values;  // When NULL, we're iterating a buffer.
-  size_t len;
-  int (*convert_fd)(void *, size_t);
-  void *convert_fd_arg;
-  argdata_t key;
-  argdata_t value;
 };
 
 static_assert(sizeof(struct argdata_map_iterator_impl) <=
@@ -69,12 +75,20 @@ static_assert(offsetof(struct argdata_map_iterator_impl, error) ==
 
 struct argdata_seq_iterator_impl {
   alignas(long) int error;
-  const uint8_t *buf;
-  const argdata_t *const *entries;  // When NULL, we're iterating a buffer.
-  size_t len;
-  int (*convert_fd)(void *, size_t);
-  void *convert_fd_arg;
-  argdata_t value;
+  enum { ADS_BUFFER, ADS_SEQ } type;
+  union {
+    struct {
+      const uint8_t *buffer;
+      size_t length;
+      int (*convert_fd)(void *, size_t);
+      void *convert_fd_arg;
+      argdata_t entry;
+    } buffer;
+    struct {
+      const argdata_t *const *entries;
+      size_t count;
+    } seq;
+  };
 };
 
 static_assert(sizeof(struct argdata_seq_iterator_impl) <=

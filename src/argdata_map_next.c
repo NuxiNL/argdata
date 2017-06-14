@@ -3,38 +3,25 @@
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "argdata_impl.h"
 
-bool argdata_map_next(argdata_map_iterator_t *it_, const argdata_t **key,
-                      const argdata_t **value) {
+void argdata_map_next(argdata_map_iterator_t *it_) {
   struct argdata_map_iterator_impl *it =
       (struct argdata_map_iterator_impl *)it_;
-  if (it->len == 0)
-    return false;
-  if (it->values == NULL) {
-    int error = parse_subfield(&it->key, &it->buf, &it->len, it->convert_fd,
-                               it->convert_fd_arg);
-    if (error != 0) {
-      it->error = error;
-      return false;
+  if (it->type == ADM_BUFFER) {
+    if (it->buffer.length == 0 ||
+        (it->error = parse_subfield(&it->buffer.key, &it->buffer.buffer,
+                                    &it->buffer.length, it->buffer.convert_fd,
+                                    it->buffer.convert_fd_arg)) != 0 ||
+        (it->error = parse_subfield(&it->buffer.value, &it->buffer.buffer,
+                                    &it->buffer.length, it->buffer.convert_fd,
+                                    it->buffer.convert_fd_arg)) != 0) {
+      it->type = ADM_MAP;
+      it->map.count = 0;
     }
-    error = parse_subfield(&it->value, &it->buf, &it->len, it->convert_fd,
-                           it->convert_fd_arg);
-    if (error != 0) {
-      it->error = error;
-      return false;
-    }
-    *key = &it->key;
-    *value = &it->value;
-    return true;
-  } else {
-    *key = *it->keys++;
-    *value = *it->values++;
-    --it->len;
-    return true;
+  } else if (it->map.count > 0) {  // type == ADM_MAP
+    ++it->map.keys;
+    ++it->map.values;
+    --it->map.count;
   }
 }

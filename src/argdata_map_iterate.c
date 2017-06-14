@@ -4,36 +4,39 @@
 // See the LICENSE file for details.
 
 #include <errno.h>
-#include <stdint.h>
 
 #include "argdata_impl.h"
 
-int argdata_map_iterate(const argdata_t *ad, argdata_map_iterator_t *it_) {
+void argdata_map_iterate(const argdata_t *ad, argdata_map_iterator_t *it_) {
   struct argdata_map_iterator_impl *it =
       (struct argdata_map_iterator_impl *)it_;
   switch (ad->type) {
-    case AD_BUFFER:
-      it->buf = ad->buffer.buffer;
-      it->len = ad->length;
-      it->convert_fd = ad->buffer.convert_fd;
-      it->convert_fd_arg = ad->buffer.convert_fd_arg;
-      it->error = parse_type(ADT_MAP, &it->buf, &it->len);
-      it->values = NULL;
+    case AD_BUFFER: {
+      it->buffer.buffer = ad->buffer.buffer;
+      it->buffer.length = ad->length;
+      it->buffer.convert_fd = ad->buffer.convert_fd;
+      it->buffer.convert_fd_arg = ad->buffer.convert_fd_arg;
+      it->error = parse_type(ADT_MAP, &it->buffer.buffer, &it->buffer.length);
+      if (it->error == 0) {
+        it->type = ADM_BUFFER;
+        argdata_map_next(it_);
+      } else {
+        it->type = ADM_MAP;
+        it->map.count = 0;
+      }
       break;
+    }
     case AD_MAP:
-      it->keys = ad->map.keys;
-      it->values = ad->map.values;
-      it->len = ad->map.count;
       it->error = 0;
+      it->type = ADM_MAP;
+      it->map.keys = ad->map.keys;
+      it->map.values = ad->map.values;
+      it->map.count = ad->map.count;
       break;
     default:
       it->error = EINVAL;
+      it->type = ADM_MAP;
+      it->map.count = 0;
       break;
   }
-  if (it->error != 0) {
-    // If the iterator is invalid, set len to zero so that calls to
-    // argdata_map_next() act as if iterating an empty mapping.
-    it->len = 0;
-  }
-  return it->error;
 }

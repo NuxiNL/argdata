@@ -41,14 +41,14 @@ typedef struct argdata_t argdata_t;
 #endif
 
 // The (mostly opaque) type representing an iterator into an argdata_t map.
-// See argdata_map_iterate and argdata_map_next.
+// See argdata_map_iterate, argdata_map_get and argdata_map_next.
 typedef struct {
   alignas(long) int error;
   char data[128];
 } argdata_map_iterator_t;
 
 // The (mostly opaque) type representing an iterator into an argdata_t sequence.
-// See argdata_seq_iterate and argdata_seq_next.
+// See argdata_seq_iterate, argdata_seq_get and argdata_seq_next.
 typedef struct {
   alignas(long) int error;
   char data[128];
@@ -207,10 +207,13 @@ int argdata_get_str_c(const argdata_t *, const char **);
 int argdata_get_timestamp(const argdata_t *, struct timespec *);
 
 // Initialize a argdata_map_iterator to iterate over the given map.
-// Returns 0 on success, or EINVAL when the argdata_t isn't a map.
+// Stores 0 in it->error on success, or EINVAL when the argdata_t isn't a map.
 // On error, the iterator is still initialized, but to iterate over an empty
-// sequence instead. The return value is also stored in it->error.
-int argdata_map_iterate(const argdata_t *, argdata_map_iterator_t *it);
+// map instead.
+void argdata_map_iterate(const argdata_t *, argdata_map_iterator_t *it);
+
+bool argdata_map_get(const argdata_map_iterator_t *it, const argdata_t **key,
+                      const argdata_t **value);
 
 // Read the next element of a map.
 // Use argdata_map_iterate to (re)initialize an iterator to (re)start iterating
@@ -221,14 +224,15 @@ int argdata_map_iterate(const argdata_t *, argdata_map_iterator_t *it);
 // When no more key-value pairs are left, false is returned.
 // When corrupted data (data not encoding a subfield, or a key without a value)
 // is encountered, false is returned and it->error is set to EINVAL.
-bool argdata_map_next(argdata_map_iterator_t *it, const argdata_t **key,
-                      const argdata_t **value);
+void argdata_map_next(argdata_map_iterator_t *it);
 
-// Initialize a argdata_seq_iterator to iterate over the given seq.
-// Returns 0 on success, or EINVAL when the argdata_t isn't a seq.
-// On error, the iterator is still initialized, but to iterate over an empty
-// sequence instead. The return value is also stored in it->error.
-int argdata_seq_iterate(const argdata_t *, argdata_seq_iterator_t *it);
+// Initialize a argdata_seq_iterator to iterate over the given sequence.
+// Stores 0 in it->error on success, or EINVAL when the argdata_t isn't
+// a sequence. On error, the iterator is still initialized, but to
+// iterate over an empty sequence instead.
+void argdata_seq_iterate(const argdata_t *, argdata_seq_iterator_t *it);
+
+bool argdata_seq_get(const argdata_seq_iterator_t *it, const argdata_t **element);
 
 // Read the next element of a seq.
 // Use argdata_seq_iterate to (re)initialize an iterator to (re)start iterating
@@ -239,7 +243,7 @@ int argdata_seq_iterate(const argdata_t *, argdata_seq_iterator_t *it);
 // When no more elements are left, false is returned.
 // When corrupted data (data not encoding a subfield) is encountered, false is
 // returned and it->error is set to EINVAL.
-bool argdata_seq_next(argdata_seq_iterator_t *it, const argdata_t **element);
+void argdata_seq_next(argdata_seq_iterator_t *it);
 
 // Write a yaml representation of the argdata to the given file.
 void argdata_print_yaml(const argdata_t *, FILE *);

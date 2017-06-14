@@ -3,29 +3,21 @@
 // This file is distributed under a 2-clause BSD license.
 // See the LICENSE file for details.
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "argdata_impl.h"
 
-bool argdata_seq_next(argdata_seq_iterator_t *it_, const argdata_t **value) {
+void argdata_seq_next(argdata_seq_iterator_t *it_) {
   struct argdata_seq_iterator_impl *it =
       (struct argdata_seq_iterator_impl *)it_;
-  if (it->len == 0)
-    return false;
-  if (it->entries == NULL) {
-    int error = parse_subfield(&it->value, &it->buf, &it->len, it->convert_fd,
-                               it->convert_fd_arg);
-    if (error != 0) {
-      it->error = error;
-      return false;
+  if (it->type == ADS_BUFFER) {
+    if (it->buffer.length == 0 ||
+        (it->error = parse_subfield(&it->buffer.entry, &it->buffer.buffer,
+                                    &it->buffer.length, it->buffer.convert_fd,
+                                    it->buffer.convert_fd_arg)) != 0) {
+      it->type = ADS_SEQ;
+      it->seq.count = 0;
     }
-    *value = &it->value;
-    return true;
-  } else {
-    *value = *it->entries++;
-    --it->len;
-    return true;
+  } else if (it->seq.count > 0) {  // type == ADS_SEQ
+    ++it->seq.entries;
+    --it->seq.count;
   }
 }

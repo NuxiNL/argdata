@@ -182,9 +182,7 @@ struct argdata_t {
 		reference operator*() const { return value_; }
 		pointer operator->() const { return &value_; }
 		map_iterator &operator++() {
-			if (!argdata_map_next(&it_, &value_.first, &value_.second)) {
-				value_ = {nullptr, nullptr};
-			}
+			argdata_map_next(&it_);
 			return *this;
 		}
 		map_iterator operator++(int) {
@@ -228,9 +226,7 @@ struct argdata_t {
 		reference operator*() const { return value_; }
 		pointer operator->() const { return &value_; }
 		seq_iterator &operator++() {
-			if (!argdata_seq_next(&it_, &value_)) {
-				value_ = nullptr;
-			}
+			argdata_seq_next(&it_);
 			return *this;
 		}
 		seq_iterator operator++(int) {
@@ -289,12 +285,14 @@ struct argdata_t {
 
 	mstd::optional<map> get_map() const {
 		map r;
-		if (argdata_map_iterate(this, &r.start_it_)) return {};
+		argdata_map_iterate(this, &r.start_it_);
+                if (r.start_it_.error != 0) return {};
 		return r;
 	}
 	mstd::optional<seq> get_seq() const {
 		seq r;
-		if (argdata_seq_iterate(this, &r.start_it_)) return {};
+		argdata_seq_iterate(this, &r.start_it_);
+                if (r.start_it_.error != 0) return {};
 		return r;
 	}
 

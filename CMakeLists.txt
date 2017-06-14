@@ -30,6 +30,7 @@ add_library(argdata
 	src/argdata_get_str_c.c
 	src/argdata_get_timestamp.c
 	src/argdata_map_iterate.c
+	src/argdata_map_get.c
 	src/argdata_map_next.c
 	src/argdata_null.c
 	src/argdata_print_yaml.c
@@ -39,6 +40,7 @@ add_library(argdata
 	src/argdata_reader_pull.c
 	src/argdata_reader_release_fd.c
 	src/argdata_seq_iterate.c
+	src/argdata_seq_get.c
 	src/argdata_seq_next.c
 	src/argdata_serialize.c
 	src/argdata_serialized_length.c
