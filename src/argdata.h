@@ -213,7 +213,7 @@ int argdata_get_timestamp(const argdata_t *, struct timespec *);
 void argdata_map_iterate(const argdata_t *, argdata_map_iterator_t *it);
 
 bool argdata_map_get(const argdata_map_iterator_t *it, const argdata_t **key,
-                      const argdata_t **value);
+                     const argdata_t **value);
 
 // Read the next element of a map.
 // Use argdata_map_iterate to (re)initialize an iterator to (re)start iterating
@@ -232,7 +232,8 @@ void argdata_map_next(argdata_map_iterator_t *it);
 // iterate over an empty sequence instead.
 void argdata_seq_iterate(const argdata_t *, argdata_seq_iterator_t *it);
 
-bool argdata_seq_get(const argdata_seq_iterator_t *it, const argdata_t **element);
+bool argdata_seq_get(const argdata_seq_iterator_t *it,
+                     const argdata_t **element);
 
 // Read the next element of a seq.
 // Use argdata_seq_iterate to (re)initialize an iterator to (re)start iterating

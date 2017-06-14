@@ -7,7 +7,8 @@
 
 #include "argdata_impl.h"
 
-bool argdata_seq_get(const argdata_seq_iterator_t *it_, const argdata_t **entry) {
+bool argdata_seq_get(const argdata_seq_iterator_t *it_,
+                     const argdata_t **entry) {
   struct argdata_seq_iterator_impl *it =
       (struct argdata_seq_iterator_impl *)it_;
   if (it->type == ADS_BUFFER) {
