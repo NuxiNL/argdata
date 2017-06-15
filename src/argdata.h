@@ -101,10 +101,20 @@ argdata_t *argdata_from_buffer(const void *buf, size_t len,
                                int (*convert_fd)(void *, size_t),
                                void *convert_fd_arg);
 
+// Same as argdata_from_buffer, but copies the buffer into the argdata_t, so
+// the original buffer may be destroyed.
+argdata_t *argdata_from_buffer_copy(const void *buf, size_t len,
+                                    int (*convert_fd)(void *, size_t),
+                                    void *convert_fd_arg);
+
 // Create an argdata_t representing a binary value.
 // The data is not copied, only the pointer and size are stored in the
 // argdata_t object.
 argdata_t *argdata_create_binary(const void *, size_t);
+
+// Same as argdata_create_binary, but copies the data into the argdata_t, so
+// the original data may be destroyed.
+argdata_t *argdata_create_binary_copy(const void *, size_t);
 
 // Create an argdata_t representing a file descriptor.
 argdata_t *argdata_create_fd(int);
@@ -125,10 +135,24 @@ argdata_t *argdata_create_map(argdata_t const *const *keys,
                               argdata_t const *const *values,
                               size_t n_key_value_pairs);
 
+// Same as argdata_create_map, but copies the argdata_t pointer arrays into the
+// resulting argdata_t, so the original key/value arrays may be destroyed.
+// Note: Only the keys and values arrays are copied (the argdata_t pointers).
+// They still refer toe the same argdata_t, which are not cloned.
+argdata_t *argdata_create_map_copy(argdata_t const *const *keys,
+                                   argdata_t const *const *values,
+                                   size_t n_key_value_pairs);
+
 // Create an argdata_t representing a sequence (of argdata_t).
 // The given array is not copied. Only the pointer and the size is stored in
 // the argdata_t object.
 argdata_t *argdata_create_seq(argdata_t const *const *, size_t);
+
+// Same as argdata_create_seq, but copies the argdata_t pointer array into the
+// resulting argdata_t, so the original array may be destroyed.
+// Note: Only the array of poniters is copied. They still refer toe the same
+// argdata_t, which are not cloned.
+argdata_t *argdata_create_seq_copy(argdata_t const *const *, size_t);
 
 // Create an argdata_t representing a string.
 // Returns NULL and sets errno to EILSEQ if the string is not valid UTF-8.
@@ -139,6 +163,11 @@ argdata_t *argdata_create_seq(argdata_t const *const *, size_t);
 // argdata_serialize and argdata_get_str on the result, this is not an issue.
 argdata_t *argdata_create_str(const char *, size_t);
 argdata_t *argdata_create_str_c(const char *);
+
+// Same as argdata_create_str[_c], but copies the string into the argdata_t, so
+// the original string may be destroyed.
+argdata_t *argdata_create_str_copy(const char *, size_t);
+argdata_t *argdata_create_str_c_copy(const char *);
 
 // Create an argdata_t representing a timestamp.
 // A (serialized) copy of the timespec is made, so the original does not have
