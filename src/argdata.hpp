@@ -160,27 +160,18 @@ struct argdata_t {
 		using reference = value_type const &;
 		using iterator_category = std::forward_iterator_tag;
 	private:
-		value_type value_ = {nullptr, nullptr};
 		argdata_map_iterator_t it_;
+		value_type value_;
 		friend map;
 	public:
-		map_iterator() {}
-		map_iterator(map_iterator const &other) { *this = other; }
-		map_iterator &operator=(map_iterator const &other) {
-			it_ = other.it_;
-			value_ = other.value_;
-			if (
-				(char *)value_.first > (char *)&other.it_ &&
-				(char *)value_.first < (char *)&other.it_ + sizeof(it_)
-			) value_.first = (argdata_t *)((char *)value_.first - (char *)&other.it_ + (char *)&it_);
-			if (
-				(char *)value_.second > (char *)&other.it_ &&
-				(char *)value_.second < (char *)&other.it_ + sizeof(it_)
-			) value_.second = (argdata_t *)((char *)value_.second - (char *)&other.it_ + (char *)&it_);
-			return *this;
+		map_iterator() { it_->index = (size_t)-1; }
+		reference operator*() const {
+			argdata_map_get(&it_, &value->first, &value->second);
+			return value_;
 		}
-		reference operator*() const { return value_; }
-		pointer operator->() const { return &value_; }
+		pointer operator->() const {
+			return &this->operator*();
+		}
 		map_iterator &operator++() {
 			argdata_map_next(&it_);
 			return *this;
@@ -190,14 +181,29 @@ struct argdata_t {
 			++*this;
 			return copy;
 		}
-		int error() const {
-			return it_.error;
+		size_t index() const {
+			return it_.index;
+		}
+		bool error() const {
+			return it_.index == static_cast<size_t>(-2);
 		}
 		friend bool operator==(map_iterator const &a, map_iterator const &b) {
-			return a.value_ == b.value_;
+			return a.index_ == b.index_;
 		}
 		friend bool operator!=(map_iterator const &a, map_iterator const &b) {
-			return !(a == b);
+			return a.index_ != b.index_;
+		}
+		friend bool operator<(map_iterator const &a, map_iterator const &b) {
+			return a.index_ < b.index_;
+		}
+		friend bool operator>(map_iterator const &a, map_iterator const &b) {
+			return a.index_ > b.index_;
+		}
+		friend bool operator>=(map_iterator const &a, map_iterator const &b) {
+			return a.index_ <= b.index_;
+		}
+		friend bool operator>=(map_iterator const &a, map_iterator const &b) {
+			return a.index_ >= b.index_;
 		}
 	};
 
@@ -250,17 +256,7 @@ struct argdata_t {
 		argdata_map_iterator_t start_it_;
 		friend argdata_t;
 	public:
-		map_iterator before_begin() const {
-			map_iterator i;
-			i.it_ = start_it_;
-			return i;
-		}
-		map_iterator begin() const {
-			map_iterator i;
-			i.it_ = start_it_;
-			++i;
-			return i;
-		}
+		map_iterator begin() const { return start_it_; }
 		map_iterator end() const { return {}; }
 	};
 
@@ -269,30 +265,20 @@ struct argdata_t {
 		argdata_seq_iterator_t start_it_;
 		friend argdata_t;
 	public:
-		seq_iterator before_begin() const {
-			seq_iterator i;
-			i.it_ = start_it_;
-			return i;
-		}
-		seq_iterator begin() const {
-			seq_iterator i;
-			i.it_ = start_it_;
-			++i;
-			return i;
-		}
+		seq_iterator begin() const { return start_it_; }
 		seq_iterator end() const { return {}; }
 	};
 
 	mstd::optional<map> get_map() const {
 		map r;
 		argdata_map_iterate(this, &r.start_it_);
-                if (r.start_it_.error != 0) return {};
+		if (r.start_it_.index == (size_t)-2) return {};
 		return r;
 	}
 	mstd::optional<seq> get_seq() const {
 		seq r;
 		argdata_seq_iterate(this, &r.start_it_);
-                if (r.start_it_.error != 0) return {};
+		if (r.start_it_.index == (size_t)-2) return {};
 		return r;
 	}
 
