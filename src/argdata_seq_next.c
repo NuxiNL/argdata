@@ -9,16 +9,29 @@ void argdata_seq_next(argdata_seq_iterator_t *it_) {
   struct argdata_seq_iterator_impl *it =
       (struct argdata_seq_iterator_impl *)it_;
   if (it->type == ADS_BUFFER) {
-    if (it->buffer.length == 0 ||
-        (it->error = parse_subfield(&it->buffer.entry, &it->buffer.buffer,
-                                    &it->buffer.length, it->buffer.convert_fd,
-                                    it->buffer.convert_fd_arg)) != 0) {
-      // Failed to load next sequence entry. Return an empty sequence.
+    if (it->buffer.length == 0) {
       it->type = ADS_SEQ;
       it->seq.count = 0;
+      it->index = (size_t)-1;
+    } else {
+      if (parse_subfield(&it->buffer.entry, &it->buffer.buffer,
+                         &it->buffer.length, it->buffer.convert_fd,
+                         it->buffer.convert_fd_arg) != 0) {
+        // Failed to load next sequence entry. Return an empty sequence.
+        it->type = ADS_SEQ;
+        it->seq.count = 0;
+        it->index = (size_t)-2;
+      } else {
+        ++it->index;
+      }
     }
-  } else if (it->seq.count > 0) {  // type == ADS_SEQ
-    ++it->seq.entries;
-    --it->seq.count;
+  } else {  // type == ADS_SEQ
+    if (it->seq.count > 0) {
+      ++it->seq.entries;
+      --it->seq.count;
+      ++it->index;
+    } else {
+      it->index = (size_t)-1;
+    }
   }
 }

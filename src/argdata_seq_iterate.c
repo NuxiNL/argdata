@@ -17,29 +17,30 @@ void argdata_seq_iterate(const argdata_t *ad, argdata_seq_iterator_t *it_) {
       it->buffer.length = ad->length;
       it->buffer.convert_fd = ad->buffer.convert_fd;
       it->buffer.convert_fd_arg = ad->buffer.convert_fd_arg;
-      it->error = parse_type(ADT_SEQ, &it->buffer.buffer, &it->buffer.length);
-      if (it->error == 0) {
-        // Call into argdata_seq_next() to load the first entry.
-        it->type = ADS_BUFFER;
-        argdata_seq_next(it_);
-      } else {
+      if (parse_type(ADT_SEQ, &it->buffer.buffer, &it->buffer.length) != 0) {
         // Not a sequence. Return an empty sequence.
         it->type = ADS_SEQ;
         it->seq.count = 0;
+        it->index = (size_t)-2;
+      } else {
+        // Call into argdata_seq_next() to load the first entry.
+        it->type = ADS_BUFFER;
+        it->index = (size_t)-1; // argdata_seq_next will increment this to 0, if nonempty.
+        argdata_seq_next(it_);
       }
       break;
     case AD_SEQ:
       // Memory based sequence iterator.
-      it->error = 0;
       it->type = ADS_SEQ;
       it->seq.entries = ad->seq.entries;
       it->seq.count = ad->seq.count;
+      it->index = 0;
       break;
     default:
       // Not a sequence. Return an empty sequence.
-      it->error = EINVAL;
       it->type = ADS_SEQ;
       it->seq.count = 0;
+      it->index = (size_t)-2;
       break;
   }
 }

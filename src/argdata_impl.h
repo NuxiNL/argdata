@@ -47,7 +47,7 @@ struct argdata_t {
 };
 
 struct argdata_map_iterator_impl {
-  ARGDATA_MAX_ALIGN int error;
+  ARGDATA_MAX_ALIGN size_t index;  // (size_t)-1 for the end iterator, (size_t)-2 for error.
   enum { ADM_BUFFER, ADM_MAP } type;
   union {
     struct {
@@ -77,7 +77,7 @@ static_assert(offsetof(struct argdata_map_iterator_impl, error) ==
               "Invalid offset");
 
 struct argdata_seq_iterator_impl {
-  ARGDATA_MAX_ALIGN int error;
+  ARGDATA_MAX_ALIGN size_t index;  // (size_t)-1 for the end iterator, (size_t)-2 for error.
   enum { ADS_BUFFER, ADS_SEQ } type;
   union {
     struct {
