@@ -164,12 +164,12 @@ struct argdata_t {
 		value_type value_;
 		friend map;
 	public:
-		map_iterator() { it_->index = (size_t)-1; }
-		reference operator*() const {
-			argdata_map_get(&it_, &value->first, &value->second);
+		map_iterator() { it_.index = ARGDATA_ITERATOR_END; }
+		reference operator*() {
+			argdata_map_get(&it_, &value_.first, &value_.second);
 			return value_;
 		}
-		pointer operator->() const {
+		pointer operator->() {
 			return &this->operator*();
 		}
 		map_iterator &operator++() {
@@ -188,22 +188,22 @@ struct argdata_t {
 			return it_.index == ARGDATA_ITERATOR_INVALID;
 		}
 		friend bool operator==(map_iterator const &a, map_iterator const &b) {
-			return a.index_ == b.index_;
+			return a.it_.index == b.it_.index;
 		}
 		friend bool operator!=(map_iterator const &a, map_iterator const &b) {
-			return a.index_ != b.index_;
+			return a.it_.index != b.it_.index;
 		}
 		friend bool operator<(map_iterator const &a, map_iterator const &b) {
-			return a.index_ < b.index_;
+			return a.it_.index < b.it_.index;
 		}
 		friend bool operator>(map_iterator const &a, map_iterator const &b) {
-			return a.index_ > b.index_;
+			return a.it_.index > b.it_.index;
+		}
+		friend bool operator<=(map_iterator const &a, map_iterator const &b) {
+			return a.it_.index <= b.it_.index;
 		}
 		friend bool operator>=(map_iterator const &a, map_iterator const &b) {
-			return a.index_ <= b.index_;
-		}
-		friend bool operator>=(map_iterator const &a, map_iterator const &b) {
-			return a.index_ >= b.index_;
+			return a.it_.index >= b.it_.index;
 		}
 	};
 
@@ -218,19 +218,14 @@ struct argdata_t {
 		argdata_seq_iterator_t it_;
 		friend seq;
 	public:
-		seq_iterator() {}
-		seq_iterator(map_iterator const &other) { *this = other; }
-		seq_iterator &operator=(seq_iterator const &other) {
-			it_ = other.it_;
-			value_ = other.value_;
-			if (
-				(char *)value_ > (char *)&other.it_ &&
-				(char *)value_ < (char *)&other.it_ + sizeof(it_)
-			) value_ = (argdata_t *)((char *)value_ - (char *)&other.it_ + (char *)&it_);
-			return *this;
+		seq_iterator() { it_.index = ARGDATA_ITERATOR_END; }
+		reference operator*() {
+			argdata_seq_get(&it_, &value_);
+			return value_;
 		}
-		reference operator*() const { return value_; }
-		pointer operator->() const { return &value_; }
+		pointer operator->() {
+			return &this->operator*();
+		}
 		seq_iterator &operator++() {
 			argdata_seq_next(&it_);
 			return *this;
@@ -240,14 +235,29 @@ struct argdata_t {
 			++*this;
 			return copy;
 		}
-		int error() const {
-			return it_.error;
+		size_t index() const {
+			return it_.index;
+		}
+		bool error() const {
+			return it_.index == ARGDATA_ITERATOR_INVALID;
 		}
 		friend bool operator==(seq_iterator const &a, seq_iterator const &b) {
-			return a.value_ == b.value_;
+			return a.it_.index == b.it_.index;
 		}
 		friend bool operator!=(seq_iterator const &a, seq_iterator const &b) {
-			return !(a == b);
+			return a.it_.index != b.it_.index;
+		}
+		friend bool operator<(seq_iterator const &a, seq_iterator const &b) {
+			return a.it_.index < b.it_.index;
+		}
+		friend bool operator>(seq_iterator const &a, seq_iterator const &b) {
+			return a.it_.index > b.it_.index;
+		}
+		friend bool operator<=(seq_iterator const &a, seq_iterator const &b) {
+			return a.it_.index <= b.it_.index;
+		}
+		friend bool operator>=(seq_iterator const &a, seq_iterator const &b) {
+			return a.it_.index >= b.it_.index;
 		}
 	};
 
@@ -256,7 +266,11 @@ struct argdata_t {
 		argdata_map_iterator_t start_it_;
 		friend argdata_t;
 	public:
-		map_iterator begin() const { return start_it_; }
+		map_iterator begin() const {
+			map_iterator i;
+			i.it_ = start_it_;
+			return i;
+		}
 		map_iterator end() const { return {}; }
 	};
 
@@ -265,7 +279,11 @@ struct argdata_t {
 		argdata_seq_iterator_t start_it_;
 		friend argdata_t;
 	public:
-		seq_iterator begin() const { return start_it_; }
+		seq_iterator begin() const {
+			seq_iterator i;
+			i.it_ = start_it_;
+			return i;
+		}
 		seq_iterator end() const { return {}; }
 	};
 
