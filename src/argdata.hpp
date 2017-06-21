@@ -160,8 +160,8 @@ struct argdata_t {
 		using reference = value_type const &;
 		using iterator_category = std::forward_iterator_tag;
 	private:
-		argdata_map_iterator_t it_;
 		value_type value_;
+		argdata_map_iterator_t it_;
 		friend map;
 	public:
 		map_iterator() { it_.index = ARGDATA_ITERATOR_END; }
