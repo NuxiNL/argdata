@@ -12,7 +12,7 @@ void argdata_seq_next(argdata_seq_iterator_t *it_) {
     if (it->buffer.length == 0) {
       it->type = ADS_SEQ;
       it->seq.count = 0;
-      it->index = (size_t)-1;
+      it->index = ARGDATA_ITERATOR_END;
     } else {
       if (parse_subfield(&it->buffer.entry, &it->buffer.buffer,
                          &it->buffer.length, it->buffer.convert_fd,
@@ -20,7 +20,7 @@ void argdata_seq_next(argdata_seq_iterator_t *it_) {
         // Failed to load next sequence entry. Return an empty sequence.
         it->type = ADS_SEQ;
         it->seq.count = 0;
-        it->index = (size_t)-2;
+        it->index = ARGDATA_ITERATOR_INVALID;
       } else {
         ++it->index;
       }
@@ -31,7 +31,7 @@ void argdata_seq_next(argdata_seq_iterator_t *it_) {
       --it->seq.count;
       ++it->index;
     } else {
-      it->index = (size_t)-1;
+      it->index = ARGDATA_ITERATOR_END;
     }
   }
 }

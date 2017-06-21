@@ -185,7 +185,7 @@ struct argdata_t {
 			return it_.index;
 		}
 		bool error() const {
-			return it_.index == static_cast<size_t>(-2);
+			return it_.index == ARGDATA_ITERATOR_INVALID;
 		}
 		friend bool operator==(map_iterator const &a, map_iterator const &b) {
 			return a.index_ == b.index_;
@@ -272,13 +272,13 @@ struct argdata_t {
 	mstd::optional<map> get_map() const {
 		map r;
 		argdata_map_iterate(this, &r.start_it_);
-		if (r.start_it_.index == (size_t)-2) return {};
+		if (r.start_it_.index == ARGDATA_ITERATOR_INVALID) return {};
 		return r;
 	}
 	mstd::optional<seq> get_seq() const {
 		seq r;
 		argdata_seq_iterate(this, &r.start_it_);
-		if (r.start_it_.index == (size_t)-2) return {};
+		if (r.start_it_.index == ARGDATA_ITERATOR_INVALID) return {};
 		return r;
 	}
 

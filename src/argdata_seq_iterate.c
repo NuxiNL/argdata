@@ -21,11 +21,11 @@ void argdata_seq_iterate(const argdata_t *ad, argdata_seq_iterator_t *it_) {
         // Not a sequence. Return an empty sequence.
         it->type = ADS_SEQ;
         it->seq.count = 0;
-        it->index = (size_t)-2;
+        it->index = ARGDATA_ITERATOR_INVALID;
       } else {
         // Call into argdata_seq_next() to load the first entry.
         it->type = ADS_BUFFER;
-        it->index = (size_t)-1; // argdata_seq_next will increment this to 0, if nonempty.
+        it->index = (size_t)-1;  // Will get incremented to 0, if nonempty.
         argdata_seq_next(it_);
       }
       break;
@@ -40,7 +40,7 @@ void argdata_seq_iterate(const argdata_t *ad, argdata_seq_iterator_t *it_) {
       // Not a sequence. Return an empty sequence.
       it->type = ADS_SEQ;
       it->seq.count = 0;
-      it->index = (size_t)-2;
+      it->index = ARGDATA_ITERATOR_INVALID;
       break;
   }
 }
