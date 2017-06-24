@@ -60,9 +60,9 @@ static void encode(const argdata_t *ad, uint8_t *buf, int *fds,
             if (fd < 0)
               encode_fd(UINT32_MAX, &buf);
             else if (fds == NULL)
-                encode_fd(fd, &buf);
+              encode_fd(fd, &buf);
             else
-                encode_fd(map_fd(fd, fds, fdslen), &buf);
+              encode_fd(map_fd(fd, fds, fdslen), &buf);
           }
           break;
         }
