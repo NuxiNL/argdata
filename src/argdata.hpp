@@ -31,13 +31,13 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <optional>
+#include <string_view>
 #include <vector>
 
 #include "argdata.h"
 
-#include <mstd/optional.hpp>
 #include <mstd/range.hpp>
-#include <mstd/string_view.hpp>
 
 struct argdata_t {
 
@@ -70,7 +70,7 @@ struct argdata_t {
 	static std::unique_ptr<argdata_t> create_int(int v) {
 		return std::unique_ptr<argdata_t>(argdata_create_int_s(v));
 	}
-	static std::unique_ptr<argdata_t> create_str(mstd::string_view v) {
+	static std::unique_ptr<argdata_t> create_str(std::string_view v) {
 		return std::unique_ptr<argdata_t>(argdata_create_str(v.data(), v.size()));
 	}
 	static std::unique_ptr<argdata_t> create_timestamp(timestamp const & v) {
@@ -102,53 +102,53 @@ struct argdata_t {
 
 	static constexpr argdata_t const *bool_(bool v) { return v ? true_() : false_(); }
 
-	mstd::optional<mstd::range<unsigned char const>> get_binary() const {
+	std::optional<mstd::range<unsigned char const>> get_binary() const {
 		void const *data;
 		size_t size;
 		if (argdata_get_binary(this, &data, &size)) return {};
 		return mstd::range<unsigned char const>{static_cast<unsigned char const *>(data), size};
 	}
-	mstd::optional<bool> get_bool() const {
+	std::optional<bool> get_bool() const {
 		bool r;
 		if (argdata_get_bool(this, &r)) return {};
 		return r;
 	}
-	mstd::optional<int> get_fd() const {
+	std::optional<int> get_fd() const {
 		int r;
 		if (argdata_get_fd(this, &r)) return {};
 		return r;
 	}
-	mstd::optional<double> get_float() const {
+	std::optional<double> get_float() const {
 		double r;
 		if (argdata_get_float(this, &r)) return {};
 		return r;
 	}
 	template<typename T>
-	mstd::optional<T> get_int() const {
+	std::optional<T> get_int() const {
 		T r;
 		if (argdata_get_int(this, &r)) return {};
 		return r;
 	}
-	mstd::optional<mstd::string_view> get_str() const {
+	std::optional<std::string_view> get_str() const {
 		char const *data;
 		size_t size;
 		if (argdata_get_str(this, &data, &size)) return {};
-		return mstd::string_view(data, size);
+		return std::string_view(data, size);
 	}
-	mstd::optional<timestamp> get_timestamp() const {
+	std::optional<timestamp> get_timestamp() const {
 		timespec r;
 		if (argdata_get_timestamp(this, &r)) return {};
 		return timestamp(std::chrono::seconds(r.tv_sec) + std::chrono::nanoseconds(r.tv_nsec));
 	}
 
 	// Same as above, but return a default value (empty/zero/etc.) instead of nullopt.
-	mstd::range<unsigned char const> as_binary   () const { return get_binary   ().value_or(            nullptr); }
-	bool                             as_bool     () const { return get_bool     ().value_or(              false); }
-	int                              as_fd       () const { return get_fd       ().value_or(                 -1); }
-	double                           as_float    () const { return get_float    ().value_or(                0.0); }
-	template<typename T> T           as_int      () const { return get_int<T>   ().value_or(                  0); }
-	mstd::string_view                as_str      () const { return get_str      ().value_or(mstd::string_view{}); }
-	timestamp                        as_timestamp() const { return get_timestamp().value_or(        timestamp{}); }
+	mstd::range<unsigned char const> as_binary   () const { return get_binary   ().value_or(           nullptr); }
+	bool                             as_bool     () const { return get_bool     ().value_or(             false); }
+	int                              as_fd       () const { return get_fd       ().value_or(                -1); }
+	double                           as_float    () const { return get_float    ().value_or(               0.0); }
+	template<typename T> T           as_int      () const { return get_int<T>   ().value_or(                 0); }
+	std::string_view                 as_str      () const { return get_str      ().value_or(std::string_view{}); }
+	timestamp                        as_timestamp() const { return get_timestamp().value_or(       timestamp{}); }
 
 	class map;
 	class seq;
@@ -287,13 +287,13 @@ struct argdata_t {
 		seq_iterator end() const { return {}; }
 	};
 
-	mstd::optional<map> get_map() const {
+	std::optional<map> get_map() const {
 		map r;
 		argdata_map_iterate(this, &r.start_it_);
 		if (r.start_it_.index == ARGDATA_ITERATOR_INVALID) return {};
 		return r;
 	}
-	mstd::optional<seq> get_seq() const {
+	std::optional<seq> get_seq() const {
 		seq r;
 		argdata_seq_iterate(this, &r.start_it_);
 		if (r.start_it_.index == ARGDATA_ITERATOR_INVALID) return {};
