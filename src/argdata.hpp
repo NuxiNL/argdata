@@ -27,21 +27,63 @@
 #include <time.h>
 
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
+#include <initializer_list>
 #include <iterator>
 #include <limits>
 #include <memory>
 #include <optional>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 #include "argdata.h"
 
+namespace argdata_range_detail {
+
+template<typename T>
+auto data(T & v) -> decltype(v.data()) { return v.data(); }
+
+template<typename T>
+T const * data(std::initializer_list<T> v) { return v.begin(); }
+
+template<typename T, size_t N>
+T * data(T (&x)[N]) { return x; }
+
+template<typename T>
+auto size(T & v) -> decltype(v.size()) { return v.size(); }
+
+template<typename T, size_t N>
+size_t size(T (&)[N]) { return N; }
+
+}
+
 struct argdata_t {
 
-	// TODO(ed): Remove this and use std::span<T> once available.
-	template<typename T>
-	using span = std::basic_string_view<T>;
+	template <typename T>
+	struct range {
+		constexpr range(decltype(nullptr) = nullptr) : begin_(nullptr), size_(0) {}
+		constexpr range(T * b, std::size_t s) : begin_(b), size_(s) {}
+		constexpr range(T * b, T * e) : begin_(b), size_(e - b) {}
+		template<
+			typename X,
+			typename = std::enable_if_t<
+				std::is_convertible<decltype(argdata_range_detail::data(std::declval<X &>())), T *>::value &&
+				std::is_convertible<decltype(argdata_range_detail::size(std::declval<X &>())), std::size_t>::value
+			>
+		>
+		constexpr range(X && x) : begin_(argdata_range_detail::data(x)), size_(argdata_range_detail::size(x)) {}
+		constexpr T * begin() const { return begin_; }
+		constexpr T *   end() const { return begin_ + size_; }
+		constexpr std::size_t size() const { return size_; }
+		constexpr T * data() const { return begin_; }
+		constexpr bool empty() const { return size_ == 0; }
+
+	private:
+		T * begin_;
+		std::size_t size_;
+	};
 
 	typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> timestamp;
 
@@ -53,10 +95,10 @@ struct argdata_t {
 		argdata_free(static_cast<argdata_t *>(p));
 	}
 
-	static std::unique_ptr<argdata_t> create_from_buffer(span<unsigned char const> r, int (*convert_fd)(void *, size_t) = nullptr, void *convert_fd_arg = nullptr) {
+	static std::unique_ptr<argdata_t> create_from_buffer(range<unsigned char const> r, int (*convert_fd)(void *, size_t) = nullptr, void *convert_fd_arg = nullptr) {
 		return std::unique_ptr<argdata_t>(argdata_from_buffer(r.data(), r.size(), convert_fd, convert_fd_arg));
 	}
-	static std::unique_ptr<argdata_t> create_binary(span<unsigned char const> r) {
+	static std::unique_ptr<argdata_t> create_binary(range<unsigned char const> r) {
 		return std::unique_ptr<argdata_t>(argdata_create_binary(r.data(), r.size()));
 	}
 	static std::unique_ptr<argdata_t> create_fd(int v) {
@@ -83,7 +125,7 @@ struct argdata_t {
 		return std::unique_ptr<argdata_t>(argdata_create_timestamp(&ts));
 	}
 
-	static std::unique_ptr<argdata_t> create_map(span<argdata_t const *const> keys, span<argdata_t const *const> values) {
+	static std::unique_ptr<argdata_t> create_map(range<argdata_t const *const> keys, range<argdata_t const *const> values) {
 		return std::unique_ptr<argdata_t>(argdata_create_map(
 			keys.data(),
 			values.data(),
@@ -91,7 +133,7 @@ struct argdata_t {
 		));
 	}
 
-	static std::unique_ptr<argdata_t> create_seq(span<argdata_t const *const> values) {
+	static std::unique_ptr<argdata_t> create_seq(range<argdata_t const *const> values) {
 		return std::unique_ptr<argdata_t>(argdata_create_seq(values.data(), values.size()));
 	}
 
@@ -101,11 +143,11 @@ struct argdata_t {
 
 	static constexpr argdata_t const *bool_(bool v) { return v ? true_() : false_(); }
 
-	std::optional<span<unsigned char const>> get_binary() const {
+	std::optional<range<unsigned char const>> get_binary() const {
 		void const *data;
 		size_t size;
 		if (argdata_get_binary(this, &data, &size)) return {};
-		return span<unsigned char const>{static_cast<unsigned char const *>(data), size};
+		return range<unsigned char const>{static_cast<unsigned char const *>(data), size};
 	}
 	std::optional<bool> get_bool() const {
 		bool r;
@@ -141,13 +183,13 @@ struct argdata_t {
 	}
 
 	// Same as above, but return a default value (empty/zero/etc.) instead of nullopt.
-	span<unsigned char const> as_binary   () const { return get_binary   ().value_or(           nullptr); }
-	bool                      as_bool     () const { return get_bool     ().value_or(             false); }
-	int                       as_fd       () const { return get_fd       ().value_or(                -1); }
-	double                    as_float    () const { return get_float    ().value_or(               0.0); }
-	template<typename T> T    as_int      () const { return get_int<T>   ().value_or(                 0); }
-	std::string_view          as_str      () const { return get_str      ().value_or(std::string_view{}); }
-	timestamp                 as_timestamp() const { return get_timestamp().value_or(       timestamp{}); }
+	range<unsigned char const> as_binary   () const { return get_binary   ().value_or(           nullptr); }
+	bool                       as_bool     () const { return get_bool     ().value_or(             false); }
+	int                        as_fd       () const { return get_fd       ().value_or(                -1); }
+	double                     as_float    () const { return get_float    ().value_or(               0.0); }
+	template<typename T> T     as_int      () const { return get_int<T>   ().value_or(                 0); }
+	std::string_view           as_str      () const { return get_str      ().value_or(std::string_view{}); }
+	timestamp                  as_timestamp() const { return get_timestamp().value_or(       timestamp{}); }
 
 	class map;
 	class seq;
