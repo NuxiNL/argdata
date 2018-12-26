@@ -47,7 +47,10 @@ cc_library(
         "src/argdata_writer_push.c",
         "src/argdata_writer_set.c",
     ],
-    hdrs = ["src/argdata.h"],
+    hdrs = [
+        "src/argdata.h",
+        "src/argdata.hpp",
+    ],
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
 )
