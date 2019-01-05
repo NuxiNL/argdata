@@ -54,3 +54,14 @@ cc_library(
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
 )
+
+# Internal implementation details of the library. These ought to be
+# private, except that cloudlibc's crt needs them to initialize an
+# argdata_t without performing heap allocations during process startup.
+cc_library(
+    name = "argdata_impl",
+    hdrs = ["src/argdata_impl.h"],
+    strip_include_prefix = "src",
+    visibility = ["//visibility:public"],
+    deps = [":argdata"],
+)
