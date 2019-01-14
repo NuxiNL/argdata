@@ -51,6 +51,7 @@ cc_library(
         "src/argdata.h",
         "src/argdata.hpp",
     ],
+    linkopts = ["-lm"],
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
 )
